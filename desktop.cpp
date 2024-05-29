@@ -14,7 +14,7 @@ namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
 	bool should_refresh = false;
 	bool alt_pressed = false;
-	std::string desktop_path = getenv("HOME") + std::string("/Desktop");
+	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
@@ -103,7 +103,8 @@ namespace rwm_desktop {
 		while ((entry = readdir(dirp)) != NULL) {
 			for (int i = 0; i < 3; i++) {
 				int is_dir = (entry->d_type & DT_DIR) != 0;
-				mvaddstr(y + i, x, icons[is_dir][i]);
+				wmove(stdscr, y + i, x);
+				rwm::waddstr_enc(stdscr, icons[is_dir][i]);
 			}
 			std::string filename = entry->d_name;
 			desktop_contents.push_back(entry->d_name);
