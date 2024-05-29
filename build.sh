@@ -13,7 +13,7 @@ done
 
 if [ separatelib = 1 ]; then
 	g++ -shared -o libdesktop.so -fPIC desktop.cpp
-	g++ $args rwm.cpp windows.cpp -o rwm -lncursesw -L. -ldesktop
+	g++ $args rwm.cpp windows.cpp charencoding.cpp -o rwm -lncursesw -L. -ldesktop
 else 
-	g++ $args rwm.cpp windows.cpp desktop.cpp -o rwm -lncursesw
+	g++ $args rwm.cpp windows.cpp desktop.cpp charencoding.cpp -o rwm -lncursesw
 fi

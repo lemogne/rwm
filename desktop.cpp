@@ -8,6 +8,7 @@
 #include <fstream>
 #include <dirent.h>
 #include "rwm.h"
+#include "charencoding.hpp"
 
 namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
@@ -65,25 +66,6 @@ namespace rwm_desktop {
 		attroff(A_REVERSE);
 	}
 
-	std::vector<std::string> codepage_437 = {
-		"\0", "☺", "☻", "♥", "♦", "♣", "♠", "•", "◘", "○", "◙", "♂", "♀", "♪", "♫", "☼",
-		"►", "◄", "↕", "‼", "¶", "§", "▬", "↨", "↑", "↓", "→", "←", "∟", "↔", "▲", "▼", 
-		" ", "!", "\"", "#", "$", "%", "&", "'", "(", ")", "*", "+", ",", "-", ".", "/", 
-		"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ":", ";", "<", "=", ">", "?", 
-		"@", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", 
-		"P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "[", "\\", "]", "^", "_", 
-		"`", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
-		"p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "{", "|", "}", "~", "⌂", 
-		"Ç", "ü", "é", "â", "ä", "à", "å", "ç", "ê", "ë", "è", "ï", "î", "ì", "Ä", "Å",
-		"É", "æ", "Æ", "ô", "ö", "ò", "û", "ù", "ÿ", "Ö", "Ü", "¢", "£", "¥", "₧", "ƒ",
-		"á", "í", "ó", "ú", "ñ", "Ñ", "ª", "º", "¿", "⌐", "¬", "½", "¼", "¡", "«", "»",
-		"░", "▒", "▓", "│", "┤", "╡", "╢", "╖", "╕", "╣", "║", "╗", "╝", "╜", "╛", "┐",
-		"└", "┴", "┬", "├", "─", "┼", "╞", "╟", "╚", "╔", "╩", "╦", "╠", "═", "╬", "╧",
-		"╨", "╤", "╥", "╙", "╘", "╒", "╓", "╫", "╪", "┘", "┌", "█", "▄", "▌", "▐", "▀",
-		"α", "ß", "Γ", "π", "Σ", "σ", "µ", "τ", "Φ", "Θ", "Ω", "δ", "∞", "φ", "ε", "∩",
-		"≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
-	};
-
 	void draw_background(std::string filename, rwm::ivec2 pos, rwm::ivec2 size) {
 		// Temporary solution; will write proper parser later
 		std::ifstream file;
@@ -106,7 +88,7 @@ namespace rwm_desktop {
 					}
 					out = "";
 				} else
-					out += codepage_437[c];
+					out += rwm::codepage_437[c];
 			}
 		}
 	}
@@ -286,14 +268,20 @@ namespace rwm_desktop {
 	}
 
 	void frame_render(rwm::Window& win, bool is_focused) {
-		wattron(win.frame, A_REVERSE);
-		cchar_t vert_cc;
-		cchar_t horiz_cc;
-		wchar_t vert  = is_focused ? u'║' : u'│';
-		wchar_t horiz = is_focused ? u'═' : u'─';
-		setcchar(&vert_cc, &vert, 0, 0, nullptr);
-		setcchar(&horiz_cc, &horiz, 0, 0, nullptr);
-		box_set(win.frame, &vert_cc, &horiz_cc);
+		if (rwm::utf8) {
+			wattron(win.frame, A_REVERSE);
+			cchar_t vert_cc;
+			cchar_t horiz_cc;
+			wchar_t vert  = is_focused ? u'║' : u'│';
+			wchar_t horiz = is_focused ? u'═' : u'─';
+			setcchar(&vert_cc, &vert, 0, 0, nullptr);
+			setcchar(&horiz_cc, &horiz, 0, 0, nullptr);
+			box_set(win.frame, &vert_cc, &horiz_cc);
+		} else {
+			if (is_focused)
+				wattron(win.frame, A_REVERSE);
+			box(win.frame, ACS_VLINE, ACS_HLINE);
+		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
 		mvwaddstr(win.frame, 0, win.frame->_maxx - 9, "[ - o x ]");
 		wattroff(win.frame, A_REVERSE);

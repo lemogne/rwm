@@ -29,6 +29,7 @@ namespace rwm {
 	std::vector<Window> windows = {};
 	bool selected_window = true;
 	int bold_mode = BOLD;
+	bool utf8 = true;
 
 	char buffer[32768];
 
@@ -64,7 +65,7 @@ namespace rwm {
 		c_args.push_back(nullptr);
 
 		// Set environment vars
-		if (has_colors())
+		if (has_colors() && utf8)
 			setenv("TERM", "xterm-color", 1);
 
 		execvp(args[0].c_str(), c_args.data());

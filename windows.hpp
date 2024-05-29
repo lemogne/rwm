@@ -46,6 +46,7 @@ namespace rwm {
 	extern int bold_mode;                                      // How are bold (^[[1m) characters displayed (see enum BOLD_MODE) [used to display more colors]
 	extern std::unordered_map<int, short> color_map;           // Map [color value] -> [color index]
 	extern std::unordered_map<uint64_t, chtype> pair_map;      // Map [color value pair] -> [pair index]
+	extern bool utf8;                                          // Using UTF-8?
 
 	struct ivec2 {
 		int y;                             // Row

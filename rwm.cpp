@@ -1,4 +1,6 @@
 #include <ncurses.h>
+#include <langinfo.h>
+#include <locale.h>
 #include <stdio.h>
 #include <pty.h>
 #include <unistd.h>
@@ -135,7 +137,8 @@ namespace rwm {
 	}
 
 	void init() {
-		setlocale(LC_ALL, "");
+		setlocale(LC_CTYPE, "");
+		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
 		initscr();
 		cbreak();
 		noecho();
