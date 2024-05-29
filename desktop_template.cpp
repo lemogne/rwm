@@ -17,6 +17,14 @@ namespace rwm_desktop {
 			rwm::terminate();
 	}
 
+	bool key_priority(int key) {
+		return false;
+	}
+
+	void mouse_pressed(MEVENT event) {
+		
+	}
+
 	bool update() {
 		// Enter program logic here
 		return false;

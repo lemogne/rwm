@@ -151,26 +151,38 @@ namespace rwm_desktop {
 	} 
 
 	void key_pressed(int key) {
+		switch(key) {
+			case '\x03':
+			rwm::terminate();
+			break;
+		}
+	}
+
+	bool key_priority(int key) {
 		if (alt_pressed) {
 			if (key == 13) {
 				int offset = rwm::windows.size();
 				rwm::windows.push_back({{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 				should_refresh = true;
 				rwm::selected_window = true;
+				return true;
+			} else if (key == 27) {
+				alt_pressed = false;
+				return false;
 			}
-			alt_pressed = false;
+			ungetch(key);
+			ungetch(27);
+			return true;
 		} else {
 			switch(key) {
-				case '\x03':
-				rwm::terminate();
-				break;
-
 				case 27:
 				alt_pressed = true;
-				break;
+				return true;
 			}
 		}
+		return false;
 	}
+
 
 	void click_taskbar(int x) {
 		int pos = (x - 4) / (tab_size + 2);

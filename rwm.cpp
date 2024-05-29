@@ -279,7 +279,9 @@ namespace rwm {
 			if (DEBUG && c != -1) {
 				print_debug(keyname(c) + (" " + std::to_string(c)));
 			}
-
+			if (rwm_desktop::key_priority(c)) 
+				continue;
+			
 			MEVENT event;
 			switch (c) {
 			case KEY_MOUSE:

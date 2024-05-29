@@ -5,7 +5,8 @@
 namespace rwm_desktop {
 	void init();                                      // Initialise desktop
 	void render();                                    // Render the desktop
-	void key_pressed(int key);                        // Handle keypress
+	void key_pressed(int key);                        // Handle keypress (while focus on desktop)
+	bool key_priority(int key);                       // Handle any keypress (takes precedence over anything else; returns whether key was handled)
 	void mouse_pressed(MEVENT event);                 // Handle mouseclick
 	bool update();                                    // Called every frame
 
