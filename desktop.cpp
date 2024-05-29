@@ -155,6 +155,7 @@ namespace rwm_desktop {
 				int offset = rwm::windows.size();
 				rwm::windows.push_back({{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 				should_refresh = true;
+				rwm::selected_window = true;
 			}
 			alt_pressed = false;
 		} else {
@@ -205,6 +206,7 @@ namespace rwm_desktop {
 						std::string name = desktop_contents[pos];
 						rwm::windows.push_back({{"xdg-open", desktop_path + name}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 						rwm::windows[SEL_WIN].title = name;
+						rwm::selected_window = true;
 					}
 					click = {-1, -1};
 				} else {
