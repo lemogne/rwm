@@ -13,6 +13,7 @@
 #include <limits>
 #include "windows.hpp"
 #include "desktop.hpp"
+#include "charencoding.hpp"
 #include <cmath>
 
 namespace rwm {
@@ -29,7 +30,6 @@ namespace rwm {
 	std::vector<Window> windows = {};
 	bool selected_window = true;
 	int bold_mode = BOLD;
-	bool utf8 = true;
 
 	char buffer[32768];
 

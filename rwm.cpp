@@ -7,6 +7,7 @@
 #include "windows.hpp"
 #include "rwm.h"
 #include "desktop.hpp"
+#include "charencoding.hpp"
 
 namespace rwm {
 	// Key Codes

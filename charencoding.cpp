@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <ncurses.h>
 
 namespace rwm {
 	std::vector<std::string> codepage_437 = {
@@ -20,6 +21,21 @@ namespace rwm {
 		"α", "ß", "Γ", "π", "Σ", "σ", "µ", "τ", "Φ", "Θ", "Ω", "δ", "∞", "φ", "ε", "∩",
 		"≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 	};
+
+	bool utf8 = true;
+
+	/*void waddstr_enc(WINDOW* win, std::string string) {
+		if (utf8) 
+			waddstr(win, string.c_str());
+		else {
+			std::string out = "";
+			for (char c : string) {
+				switch (c) {
+
+				}
+			}
+		}
+	}*/
 
 	//void put_acs_char()
 }
