@@ -139,8 +139,8 @@ namespace rwm {
 
 	void init() {
 		setlocale(LC_CTYPE, "");
-		//utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
-		utf8 = false;
+		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
+		//utf8 = false;
 		initscr();
 		init_encoding();
 		cbreak();

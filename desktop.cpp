@@ -165,10 +165,13 @@ namespace rwm_desktop {
 				rwm::windows.push_back({{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 				should_refresh = true;
 				rwm::selected_window = true;
+				alt_pressed = false;
 				return true;
 			} else if (key == 27) {
 				alt_pressed = false;
 				return false;
+			} else if (key == -1) {
+				return true;
 			}
 			ungetch(key);
 			ungetch(27);
