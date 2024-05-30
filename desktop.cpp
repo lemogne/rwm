@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include "rwm.h"
 #include "charencoding.hpp"
+#define P_SEL_WIN (rwm::windows[rwm::windows.size() - 1])
 
 namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
@@ -19,6 +20,132 @@ namespace rwm_desktop {
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
 	rwm::ivec2 click = {-1, -1};
+
+	struct cell {
+		struct iterator {
+			friend class cell;
+			public:
+			rwm::Window* operator *() const { 
+				if (owner.window == nullptr) {
+					if (index < owner.cells.size())
+						return **it;
+					else
+						return nullptr;
+				} else {
+					return (index == 0) ? owner.window : nullptr;
+				}
+			}
+			const iterator &operator ++() {
+				if (owner.window != nullptr) {
+					index++;
+				} else {
+					++*it;
+					if (**it == nullptr) {
+						index++;
+						delete it;
+						if (index < owner.cells.size())
+							it = new iterator(owner.cells[index], 0);
+						else
+							it = nullptr;
+					}
+				}
+				return *this;
+			}
+			//iterator operator ++(int) { iterator copy(*this); ++i_; return copy; }
+
+			bool operator ==(const iterator &other) const {return **this == *other;}
+			bool operator !=(const iterator &other) const {return **this != *other;}
+
+			//protected:
+			iterator(cell& owner, int index) : owner (owner), index(index) {
+				if (owner.window == nullptr && owner.cells.size() > 0 && index < owner.cells.size())
+					it = new iterator(owner.cells[index], 0);
+				else
+					it = nullptr;
+			}
+
+			~iterator() {if (it) delete it;}
+
+			private:
+			int index;
+			iterator* it;
+			cell& owner;
+		};
+		rwm::Window* window;
+		std::vector<cell> cells{};
+		bool vertical;
+		cell* parent;
+
+		iterator begin() {return iterator(*this, 0);}
+
+		iterator end() {return iterator(*this, cells.size());}
+
+		void add(rwm::Window* win) {
+			if (window != nullptr) {
+				cells.push_back({window, {}, false, this});
+				window = nullptr;
+			}
+			cells.push_back({win, {}, false, this});
+		}
+
+		int remove(rwm::Window* win) {
+			if (window == win) {
+				window = nullptr;
+				return -1;
+			}
+			
+			for (int i = 0; i < cells.size(); i++) {
+				switch (cells[i].remove(win)) {
+					case -1:
+					cells.erase(cells.begin() + i);
+					if (cells.size() == 0)
+						return -1;
+					else if (cells.size() == 1) 
+						return 2;
+					//fallthrough;
+					case 1:
+					return 1;
+
+					case 2:
+					cells[i] = cells[i].cells[0];
+					cells[i].parent = this;
+					return 1;
+
+					default: 
+					continue;
+				}
+			}
+			return 0;
+		}
+
+		rwm::Window* get(int& i) {
+			if (window == nullptr) {
+				for (int j = 0; j < cells.size(); j++) {
+					rwm::Window* ccell = cells[j].get(i);
+					if (ccell != nullptr)
+						return ccell;
+				}
+			} else {
+				if (i == 0) 
+					return window;
+				i -= 1;
+			}
+			return nullptr;
+		}
+	};
+
+	cell root_cell = {nullptr, {}, false, nullptr};
+
+	cell& current_cell = root_cell;
+
+	void new_win(rwm::Window* win) {
+		rwm::windows.push_back(win);
+		current_cell.add(P_SEL_WIN);
+	}
+
+	void close_window(rwm::Window* win) {
+		root_cell.remove(win);
+	}
 
 	char icons[2][3][11] = {
 		{
@@ -48,9 +175,9 @@ namespace rwm_desktop {
 		attron(A_REVERSE);
 		mvaddstr(stdscr->_maxy, 0, bar.c_str());
 		mvaddstr(stdscr->_maxy, 0, "[rwm]");
-		for (int i = 0; i <= SEL_WIN; i++) {
-			rwm::Window& win = rwm::windows[i];
-			if (i == SEL_WIN && rwm::selected_window) 
+		for (rwm::Window* pwin : root_cell) {
+			rwm::Window& win = *pwin;
+			if (pwin == P_SEL_WIN && rwm::selected_window) 
 				attroff(A_REVERSE);
 			else
 				attron(A_REVERSE);
@@ -162,7 +289,7 @@ namespace rwm_desktop {
 		if (alt_pressed) {
 			if (key == 13) {
 				int offset = rwm::windows.size();
-				rwm::windows.push_back({{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
+				new_win(new rwm::Window{{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 				should_refresh = true;
 				rwm::selected_window = true;
 				alt_pressed = false;
@@ -192,13 +319,19 @@ namespace rwm_desktop {
 		if (x <= 4) {
 			// [rwm] menu
 		} else if (pos < rwm::windows.size()){
+			rwm::Window* win = current_cell.get(pos);
 			if (pos == SEL_WIN && rwm::selected_window) {
-				rwm::windows[pos].status |= rwm::HIDDEN;
+				win->status |= rwm::HIDDEN;
 				rwm::selected_window = false;
 				curs_set(0);
 			} else {
-				rwm::windows[pos].status &= ~rwm::HIDDEN;
-				rwm::move_to_top(pos);
+				win->status &= ~rwm::HIDDEN;
+				for (int i = 0; i < rwm::windows.size(); i++) {
+					if (rwm::windows[i] == win) {
+						rwm::move_to_top(i);
+						break;
+					}
+				}
 				rwm::selected_window = true;
 			}
 			should_refresh = true;
@@ -220,8 +353,8 @@ namespace rwm_desktop {
 					if (pos < desktop_contents.size()) {
 						int offset = rwm::windows.size();
 						std::string name = desktop_contents[pos];
-						rwm::windows.push_back({{"xdg-open", desktop_path + name}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
-						rwm::windows[SEL_WIN].title = name;
+						new_win(new rwm::Window{{"xdg-open", desktop_path + name}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
+						P_SEL_WIN->title = name;
 						rwm::selected_window = true;
 					}
 					click = {-1, -1};
@@ -237,7 +370,7 @@ namespace rwm_desktop {
 	}
 
 	bool frame_click(int i, rwm::ivec2 pos, int bstate) {
-		rwm::Window& win = rwm::windows[i];
+		rwm::Window& win = *rwm::windows[i];
 		rwm::ivec2 fpos = {pos.y - win.frame->_begy, pos.x - win.frame->_begx};;
 		if (bstate & BUTTON1_PRESSED)  {
 			if (fpos.y == 0 && fpos.x >= win.frame->_maxx - 9 && fpos.x < win.frame->_maxx) {

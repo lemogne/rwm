@@ -38,4 +38,8 @@ namespace rwm_desktop {
 	void frame_render(rwm::Window& win, bool is_focused) {
 		// Add window frame renderer here
 	}
+
+	void close_window(int i) {
+		
+	}
 }

@@ -27,7 +27,7 @@ namespace rwm {
 	std::unordered_map<int, short> color_map = {};
 	std::unordered_map<uint64_t, chtype> pair_map = {};
 
-	std::vector<Window> windows = {};
+	std::vector<Window*> windows = {};
 	bool selected_window = true;
 	int bold_mode = BOLD;
 

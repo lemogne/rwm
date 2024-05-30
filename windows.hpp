@@ -104,7 +104,7 @@ namespace rwm {
 		void erase(char mode);                // Erase part of screen based on input char
 	};
 	
-	extern std::vector<Window> windows;       // Currently open windows
+	extern std::vector<Window*> windows;      // Currently open windows
 	extern bool selected_window;              // Is a window selected (if so, it's the top window of `windows`)
 	void print_debug(std::string msg);        // Print debug message `msg` to stdscr
 }

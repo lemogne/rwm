@@ -13,6 +13,7 @@ namespace rwm_desktop {
 	// Windows
 	bool frame_click(int i, rwm::ivec2 pos, int bstate);             // On Window frame click; returns whether window no. i is being moved
 	void frame_render(rwm::Window& win, bool is_focused);            // On Window render
+	void close_window(rwm::Window* win);                             // On Window closed
 }
 
 #endif

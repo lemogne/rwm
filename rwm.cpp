@@ -192,57 +192,59 @@ namespace rwm {
 
 	void move_to_top(int i) {
 		std::string status = "\033[O";
-		if (windows[SEL_WIN].status & REPORT_FOCUS)
-			write(windows[SEL_WIN].master, status.c_str(), status.size());
+		if (windows[SEL_WIN]->status & REPORT_FOCUS)
+			write(windows[SEL_WIN]->master, status.c_str(), status.size());
 
-		Window sel = windows[i];
+		Window* sel = windows[i];
 		windows.erase(windows.begin() + i);
 		windows.push_back(sel);
 
 		status = "\033[I";
-		if (windows[SEL_WIN].status & REPORT_FOCUS)
-			write(windows[SEL_WIN].master, status.c_str(), status.size());
+		if (windows[SEL_WIN]->status & REPORT_FOCUS)
+			write(windows[SEL_WIN]->master, status.c_str(), status.size());
 	}
 
 	void set_selected(int i) {
-		windows[SEL_WIN].render(false);
+		windows[SEL_WIN]->render(false);
 		if (i < 0) {
 			selected_window = false;
 			return;
 		}
-		windows[i].render(true);
+		windows[i]->render(true);
 		move_to_top(i);
 		selected_window = true;
 	}
 
 	int get_top_window(ivec2 pos) {
 		for (int i = windows.size() - 1; i >= 0; i--) {
-			if (!(windows[i].status & HIDDEN) 
-			 && windows[i].frame->_begx <= pos.x && pos.x <= windows[i].frame->_begx + windows[i].frame->_maxx
-			 && windows[i].frame->_begy <= pos.y && pos.y <= windows[i].frame->_begy + windows[i].frame->_maxy)
+			if (!(windows[i]->status & HIDDEN) 
+			 && windows[i]->frame->_begx <= pos.x && pos.x <= windows[i]->frame->_begx + windows[i]->frame->_maxx
+			 && windows[i]->frame->_begy <= pos.y && pos.y <= windows[i]->frame->_begy + windows[i]->frame->_maxy)
 			 	return i;
 		}
 		return -1;
 	}
 
 	bool is_on_frame(ivec2 pos) {
-		WINDOW* f = windows[SEL_WIN].frame;
+		WINDOW* f = windows[SEL_WIN]->frame;
 		return f->_begx == pos.x || f->_begx + f->_maxx == pos.x
 		    || f->_begy == pos.y || f->_begy + f->_maxy == pos.y;
 	}
 
 	void close_window(int i) {
-		windows[i].destroy();
-		windows.erase(windows.begin() + i);
+		windows[i]->destroy();
+		rwm_desktop::close_window(windows[i]);
 		if (i == SEL_WIN) 
 			set_selected(-1);
+		delete windows[i];
+		windows.erase(windows.begin() + i);
 		full_refresh();
 	}
 
 	void full_refresh() {
 		rwm_desktop::render();
 		for (int i = 0; i < rwm::windows.size(); i++)
-			rwm::windows[i].render(i == SEL_WIN);
+			rwm::windows[i]->render(i == SEL_WIN);
 	}
 
 	inline int main() {
@@ -254,25 +256,25 @@ namespace rwm {
 			if (should_refresh)
 				rwm_desktop::render();
 			for (int i = 0; i < windows.size(); i++) {
-				if (!(windows[i].status & FROZEN)) {
-					int ret = windows[i].output();
+				if (!(windows[i]->status & FROZEN)) {
+					int ret = windows[i]->output();
 					should_refresh |= (ret == 1);
-					if ((windows[i].status & SHOULD_CLOSE) && !(windows[i].status & NO_EXIT)) {
+					if ((windows[i]->status & SHOULD_CLOSE) && !(windows[i]->status & NO_EXIT)) {
 						close_window(i);
 						should_refresh = true;
-					} else if (should_refresh && !(windows[i].status & HIDDEN))
-						windows[i].render(i == SEL_WIN);
-				} else if ((windows[i].status & FROZEN) && should_refresh)
-					windows[i].render(i == SEL_WIN);
+					} else if (should_refresh && !(windows[i]->status & HIDDEN))
+						windows[i]->render(i == SEL_WIN);
+				} else if ((windows[i]->status & FROZEN) && should_refresh)
+					windows[i]->render(i == SEL_WIN);
 			}
 			if (SEL_WIN >= 0)
-				wrefresh(windows[SEL_WIN].win);
+				wrefresh(windows[SEL_WIN]->win);
 			else
 				selected_window = false;
 			
 			int c;
 			if (selected_window)
-				c = wgetch(windows[SEL_WIN].win);
+				c = wgetch(windows[SEL_WIN]->win);
 			else {
 				c = getch();
 				curs_set(0);
@@ -300,20 +302,20 @@ namespace rwm {
 							set_selected(get_top_window(click_pos));
 						}
 						if (selected_window) {
-							switch (windows[SEL_WIN].mouse_mode) {
+							switch (windows[SEL_WIN]->mouse_mode) {
 								case 1000: {
 									char mouse_msg[6] = {'\033', '[', 'M', mouse_conversion.at(event.bstate & MOUSE_MASK), 
-										(char) (event.x- windows[SEL_WIN].win->_begx + 33), (char) (event.y - windows[SEL_WIN].win->_begy + 33)
+										(char) (event.x- windows[SEL_WIN]->win->_begx + 33), (char) (event.y - windows[SEL_WIN]->win->_begy + 33)
 									};
 									if (DEBUG)
 										print_debug(mouse_msg);
-									write(windows[SEL_WIN].master, mouse_msg, 6);
+									write(windows[SEL_WIN]->master, mouse_msg, 6);
 								}
 								break;
 
 								/*case 1006:
 								std::string mouse_msg = "\033[" + std::to_string(mouse_state & 3) + ';'
-									+ std::to_string(event.y- windows[SEL_WIN].win->_begy + 1) + ';' + std::to_string(event.x - windows[SEL_WIN].win->_begx + 1)
+									+ std::to_string(event.y- windows[SEL_WIN]->win->_begy + 1) + ';' + std::to_string(event.x - windows[SEL_WIN]->win->_begx + 1)
 									+ 'M';*/
 
 
@@ -335,18 +337,18 @@ namespace rwm {
 			case KEY_BACKSPACE: case '\b':
 				c = '\b';
 				if (selected_window) {
-					wdelch(windows[SEL_WIN].win);
-					write(windows[SEL_WIN].master, &c, 1);
+					wdelch(windows[SEL_WIN]->win);
+					write(windows[SEL_WIN]->master, &c, 1);
 				} else
 					rwm_desktop::key_pressed(c);
 				break;
 
 			default:
 				if (selected_window) {
-					if ((windows[SEL_WIN].status & APP_CURSOR) && app_key_conversion.find(c) != app_key_conversion.end()) {
-						write(windows[SEL_WIN].master, app_key_conversion.at(c).c_str(), app_key_conversion.at(c).size());
+					if ((windows[SEL_WIN]->status & APP_CURSOR) && app_key_conversion.find(c) != app_key_conversion.end()) {
+						write(windows[SEL_WIN]->master, app_key_conversion.at(c).c_str(), app_key_conversion.at(c).size());
 					} else if (key_conversion.find(c) != key_conversion.end()) {
-						write(windows[SEL_WIN].master, key_conversion.at(c).c_str(), key_conversion.at(c).size());
+						write(windows[SEL_WIN]->master, key_conversion.at(c).c_str(), key_conversion.at(c).size());
 					} else if (c > 276 && c < 313) {
 						int cc = (c - 265) % 12 + 265;
 						int mod = (c - 265) / 12;
@@ -355,7 +357,7 @@ namespace rwm {
 						int alt = (mod & 4) >> 1;
 						std::string code = key_conversion.at(cc).substr(0, 4) + ';' + std::to_string(shift + ctrl + alt) + '~';
 					} else if (c < 256) {
-						write(windows[SEL_WIN].master, &c, 1);
+						write(windows[SEL_WIN]->master, &c, 1);
 					}
 				} else
 					rwm_desktop::key_pressed(c);
@@ -364,8 +366,8 @@ namespace rwm {
 			case '\x03':
 				// ^C
 				if (selected_window)  {
-					write(windows[SEL_WIN].master, &c, 1);
-					windows[SEL_WIN].status &= ~NO_EXIT;
+					write(windows[SEL_WIN]->master, &c, 1);
+					windows[SEL_WIN]->status &= ~NO_EXIT;
 				} else
 					rwm_desktop::key_pressed(c);
 				break;
