@@ -9,10 +9,20 @@
 #include <dirent.h>
 #include "rwm.h"
 #include "charencoding.hpp"
-#define P_SEL_WIN (rwm::windows[rwm::windows.size() - 1])
+#define P_SEL_WIN (rwm::windows.back())
 
 namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
+	enum resize_modes {
+		OFF = 0,
+		DRAG_X = 1,
+		DRAG_Y = 2,
+		DRAG_XY = 3,
+		CHANGE_X = 4,
+		CHANGE_Y = 8,
+		KEYBOARD = 16
+	};
+	int resize_mode = OFF;
 	bool should_refresh = false;
 	bool alt_pressed = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
@@ -20,6 +30,17 @@ namespace rwm_desktop {
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
 	rwm::ivec2 click = {-1, -1};
+
+	void set_selected(rwm::Window* win) {
+		for (int i = 0; i < rwm::windows.size(); i++) {
+			if (rwm::windows[i] == win) {
+				rwm::set_selected(i);
+				should_refresh = true;
+				break;
+			}
+		}
+		//rwm::selected_window = true;
+	}
 
 	struct cell {
 		struct iterator {
@@ -132,15 +153,55 @@ namespace rwm_desktop {
 			}
 			return nullptr;
 		}
+
+		struct cell_index {
+			cell* c;
+			std::vector<int> indices;
+		};
+
+		cell_index find_cell_of(rwm::Window* win) {
+			if (window == nullptr) {
+				for (int j = 0; j < cells.size(); j++) {
+					cell_index ccell = cells[j].find_cell_of(win);
+					if (ccell.c != nullptr) {
+						ccell.indices.push_back(j);
+						return ccell;
+					}
+				}
+			} else {
+				if (win == window) 
+					return {this->parent, {}};
+			}
+			return {nullptr, {}};
+		}
+
+		void move_window_selection(rwm::ivec2 d) {
+			// Assuming d has at most one entry {-1, 1} and the other entry 0
+			cell_index selected_cell = find_cell_of(P_SEL_WIN);
+			while(!selected_cell.indices.empty()) {
+				if (selected_cell.c == nullptr)
+					selected_cell.c = this;
+				int new_i = selected_cell.indices.back() + ((d.y != 0) ? d.y : d.x);
+
+				if ((vertical ^ (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
+					alt_pressed = false;
+					set_selected(selected_cell.c->cells[new_i].window);
+					return;
+				}
+		
+				selected_cell.c = selected_cell.c->parent;
+				selected_cell.indices.pop_back();
+			}
+		}
 	};
 
 	cell root_cell = {nullptr, {}, false, nullptr};
 
-	cell& current_cell = root_cell;
-
 	void new_win(rwm::Window* win) {
 		rwm::windows.push_back(win);
-		current_cell.add(P_SEL_WIN);
+		cell* current_cell = root_cell.find_cell_of(P_SEL_WIN).c;
+		current_cell = current_cell ? current_cell : &root_cell;
+		current_cell->add(P_SEL_WIN);
 	}
 
 	void close_window(rwm::Window* win) {
@@ -285,29 +346,139 @@ namespace rwm_desktop {
 		}
 	}
 
+	void move_selected_win(rwm::ivec2 d) {
+		if (rwm::selected_window) { 
+			P_SEL_WIN->move_by(d);
+			should_refresh = true;
+			alt_pressed = false;
+		}
+	}
+
 	bool key_priority(int key) {
 		if (alt_pressed) {
-			if (key == 13) {
+			switch (key) {
+			case 13: {
 				int offset = rwm::windows.size();
 				new_win(new rwm::Window{{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
 				should_refresh = true;
 				rwm::selected_window = true;
 				alt_pressed = false;
 				return true;
-			} else if (key == 27) {
-				alt_pressed = false;
-				return false;
-			} else if (key == -1) {
+			}
+
+			case 27:
+			alt_pressed = false;
+			return false;
+
+			case 'r':
+			resize_mode ^= KEYBOARD;
+			alt_pressed = false;
+			return true;
+
+			// Move window
+			case 'K':
+			move_selected_win({-1, 0});
+			return true;
+
+			case 'J':
+			move_selected_win({1, 0});
+			return true;
+
+			case 'H':
+			move_selected_win({0, -1});
+			return true;
+
+			case 'L':
+			move_selected_win({0, 1});
+			return true;
+
+			// Move selection
+			case 'k':
+			root_cell.move_window_selection({-1, 0});
+			return true;
+
+			case 'j':
+			root_cell.move_window_selection({1, 0});
+			return true;
+
+			case 'h':
+			root_cell.move_window_selection({0, -1});
+			return true;
+
+			case 'l':
+			root_cell.move_window_selection({0, 1});
+			return true;
+
+			case -1:
 				return true;
+
+			default:
+				break;
 			}
 			ungetch(key);
 			ungetch(27);
 			return true;
 		} else {
-			switch(key) {
-				case 27:
-				alt_pressed = true;
+			if (resize_mode & KEYBOARD) {
+			switch (key) {
+				case KEY_UP: case 'k':
+				P_SEL_WIN->resize({P_SEL_WIN->size.y - 1, P_SEL_WIN->size.x});
+				should_refresh = true;
 				return true;
+				case KEY_DOWN: case 'j':
+				P_SEL_WIN->resize({P_SEL_WIN->size.y + 1, P_SEL_WIN->size.x});
+				should_refresh = true;
+				return true;
+				case KEY_LEFT: case 'h':
+				P_SEL_WIN->resize({P_SEL_WIN->size.y, P_SEL_WIN->size.x - 1});
+				should_refresh = true;
+				return true;
+				case KEY_RIGHT: case 'l':
+				P_SEL_WIN->resize({P_SEL_WIN->size.y, P_SEL_WIN->size.x + 1});
+				should_refresh = true;
+				return true;
+				default:
+				break;
+				}
+			}
+			switch(key) {
+			case 27:
+			alt_pressed = true;
+			return true;
+
+			// Move window
+			case 566:
+			move_selected_win({-1, 0});
+			return true;
+
+			case 525:
+			move_selected_win({1, 0});
+			return true;
+
+			case 545:
+			move_selected_win({0, -1});
+			return true;
+
+			case 560:
+			move_selected_win({0, 1});
+			return true;
+
+			// Move selection
+			case KEY_SR:
+			root_cell.move_window_selection({-1, 0});
+			return true;
+
+			case KEY_SF:
+			root_cell.move_window_selection({1, 0});
+			return true;
+
+			case KEY_SLEFT:
+			root_cell.move_window_selection({0, -1});
+			return true;
+
+			case KEY_SRIGHT:
+			root_cell.move_window_selection({0, 1});
+			return true;
 			}
 		}
 		return false;
@@ -319,7 +490,7 @@ namespace rwm_desktop {
 		if (x <= 4) {
 			// [rwm] menu
 		} else if (pos < rwm::windows.size()){
-			rwm::Window* win = current_cell.get(pos);
+			rwm::Window* win = root_cell.get(pos);
 			if (pos == SEL_WIN && rwm::selected_window) {
 				win->status |= rwm::HIDDEN;
 				rwm::selected_window = false;
@@ -371,7 +542,7 @@ namespace rwm_desktop {
 
 	bool frame_click(int i, rwm::ivec2 pos, int bstate) {
 		rwm::Window& win = *rwm::windows[i];
-		rwm::ivec2 fpos = {pos.y - win.frame->_begy, pos.x - win.frame->_begx};;
+		rwm::ivec2 fpos = {pos.y - win.frame->_begy, pos.x - win.frame->_begx};
 		if (bstate & BUTTON1_PRESSED)  {
 			if (fpos.y == 0 && fpos.x >= win.frame->_maxx - 9 && fpos.x < win.frame->_maxx) {
 				should_refresh = true;
@@ -401,13 +572,32 @@ namespace rwm_desktop {
 				return false;
 			}
 			drag_pos = pos;
+			resize_mode &= KEYBOARD;
+			resize_mode |= (fpos.x == 0 || fpos.x == win.size.x - 1) ? CHANGE_X : OFF;
+			resize_mode |= ((fpos.y == 0 && (resize_mode & CHANGE_X)) || fpos.y == win.size.y - 1) ? CHANGE_Y : OFF;
+			resize_mode |= (fpos.y == 0) ? DRAG_Y : OFF;
+			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
 			wattron(win.frame, A_REVERSE);
-			box(win.frame, '|', '-');
+			if (resize_mode & (CHANGE_X | CHANGE_Y)) 
+				box(win.frame, '*', '*');
+			else 
+				box(win.frame, '|', '-');
 			wattroff(win.frame, A_REVERSE);
 			wrefresh(win.frame);
 			return true;
 		} else if (bstate & BUTTON1_RELEASED) {
-			win.move_by({pos.y - drag_pos.y, pos.x - drag_pos.x});
+			if (resize_mode & (CHANGE_X | CHANGE_Y)) {
+				rwm::ivec2 new_size = {
+					(resize_mode & CHANGE_Y) ? win.size.y + pos.y - drag_pos.y : win.size.y, 
+					(resize_mode & CHANGE_X) ? win.size.x + pos.x - drag_pos.x : win.size.x
+				};
+				win.resize(new_size);
+				if (resize_mode & DRAG_X)
+					win.move_by({0, pos.x - drag_pos.x});
+				if (resize_mode & DRAG_Y)
+					win.move_by({pos.y - drag_pos.y, 0});
+			} else
+				win.move_by({pos.y - drag_pos.y, pos.x - drag_pos.x});
 			draw_taskbar();
 			rwm::full_refresh();
 			drag_pos = {-1, -1};

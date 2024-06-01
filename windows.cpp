@@ -145,10 +145,10 @@ namespace rwm {
 			mvwin(alt_frame, 0, 0);
 			mvwin(win, 1, 1);
 			mvwin(alt_win, 1, 1);
-			wresize(frame, stdscr->_maxy, stdscr->_maxx);
-			wresize(alt_frame, stdscr->_maxy, stdscr->_maxx);
-			wresize(win, stdscr->_maxy - 2, stdscr->_maxx - 2);
-			wresize(alt_win, stdscr->_maxy - 2, stdscr->_maxx - 2);
+			wresize(frame, stdscr->_maxy, stdscr->_maxx + 1);
+			wresize(alt_frame, stdscr->_maxy, stdscr->_maxx + 1);
+			wresize(win, stdscr->_maxy - 2, stdscr->_maxx - 1);
+			wresize(alt_win, stdscr->_maxy - 2, stdscr->_maxx - 1);
 
 		} else {
 			wresize(win, size.y - 2, size.x - 2);
@@ -177,6 +177,35 @@ namespace rwm {
 		refresh();
 		wrefresh(frame);
 	}
+
+	void Window::resize(ivec2 size) {
+		if (status & rwm::MAXIMIZED) 
+			return;
+		
+		this->size = size;
+		box(frame, ' ', ' ');
+		wresize(win, size.y - 2, size.x - 2);
+		wresize(alt_win, size.y - 2, size.x - 2);
+		wresize(frame, size.y, size.x);
+		wresize(alt_frame, size.y, size.x);
+		winsize wsize;
+		rwm::ivec2 size_win = {win->_maxy + 1, win->_maxx + 1};
+		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
+			printf("TIOCGWINSZ error");
+		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
+		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
+		wsize.ws_row = size_win.y;
+		wsize.ws_col = size_win.x;
+		ioctl(master, TIOCSWINSZ, (char *) &wsize);
+		touchwin(frame);
+		touchwin(alt_frame);
+		touchwin(win);
+		touchwin(alt_win);
+		touchwin(stdscr);
+		refresh();
+		wrefresh(frame);
+	}
+
 
 	std::unordered_map<int, chtype> attr_modes_on = {
 		{1, A_BOLD},
@@ -569,6 +598,9 @@ namespace rwm {
 	}
 
 	void Window::move(ivec2 pos) {
+		if (status & rwm::MAXIMIZED)
+			return;
+
 		ivec2 offset = {win->_begy - frame->_begy, win->_begx - frame->_begx};
 		int can_move = mvwin(frame, pos.y, pos.x);
 		if (can_move == ERR)
