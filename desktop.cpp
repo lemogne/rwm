@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include "rwm.h"
 #include "charencoding.hpp"
+#include <unistd.h>
 #define P_SEL_WIN (rwm::windows.back())
 
 namespace rwm_desktop {
@@ -397,7 +398,7 @@ namespace rwm_desktop {
 		//draw_background("./12_DEC23.ANS", {15, 50}, {1, 1});
 		draw_icons();
 		draw_taskbar();
-
+		chdir(desktop_path.c_str());
 		return;
 	}
 
@@ -432,7 +433,7 @@ namespace rwm_desktop {
 		std::string current_input = "";
 		bool in_quotes = false;
 		bool escape = false;
-		std::string prompt_string = '>' + std::string(stdscr->_maxx - 11, ' ');
+		std::string prompt_string = " >" + std::string(stdscr->_maxx - 13, ' ');
 		mvaddstr(stdscr->_maxy, 5, prompt_string.c_str());
 		echo();
 		move(stdscr->_maxy, 7);
@@ -470,8 +471,14 @@ namespace rwm_desktop {
 			}
 			switch(c) {
 				case '\n': case '\r': {
+					int status = 0;
+					if (!current_input.compare("@"))
+						status = rwm::NO_EXIT;
+					else
+						input.push_back(current_input);
 					int offset = rwm::windows.size();
-					new_win(new rwm::Window{input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
+					new_win(new rwm::Window{input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, status});
+					rwm::selected_window = true;
 					draw_taskbar();
 					noecho();
 					return;
@@ -481,6 +488,13 @@ namespace rwm_desktop {
 				draw_taskbar();
 				noecho();
 				return;
+
+				case '\b': case KEY_BACKSPACE:
+				if (current_input.size() > 0) {
+					current_input = current_input.substr(0, current_input.size() - 1);
+					addstr(" \b");
+				}
+				continue;
 
 				case 92:
 				escape = true;
