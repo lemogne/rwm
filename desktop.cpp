@@ -26,6 +26,7 @@ namespace rwm_desktop {
 	bool should_refresh = false;
 	bool alt_pressed = false;
 	bool tiled_mode = false;
+	bool vertical_mode = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
@@ -101,10 +102,18 @@ namespace rwm_desktop {
 
 		iterator end() {return iterator(*this, cells.size());}
 
-		void add(rwm::Window* win) {
+		struct cell_index {
+			cell* c;
+			std::vector<int> indices;
+		};
+		void add(rwm::Window* win, cell_index& j) {
 			if (window != nullptr) {
+				vertical = vertical_mode;
 				cells.push_back({window, {}, false, this});
 				window = nullptr;
+			} else if (vertical != vertical_mode) {
+				j.c->cells[j.indices.back()].add(win, j);
+				return;
 			}
 			cells.push_back({win, {}, false, this});
 		}
@@ -154,10 +163,6 @@ namespace rwm_desktop {
 			return nullptr;
 		}
 
-		struct cell_index {
-			cell* c;
-			std::vector<int> indices;
-		};
 
 		cell_index find_cell_of(rwm::Window* win) {
 			if (window == nullptr) {
@@ -175,22 +180,32 @@ namespace rwm_desktop {
 			return {nullptr, {}};
 		}
 
+		void set_selected_cell(cell& cell, int j) {
+			if (cell.window)
+				set_selected(cell.window);
+			else {
+				j = std::min(j, (int) cell.cells.size());
+				set_selected_cell(cell.cells[j], 0);
+			}
+		}
+
 		void move_window_selection(rwm::ivec2 d) {
 			// Assuming d has at most one entry {-1, 1} and the other entry 0
 			cell_index selected_cell = find_cell_of(P_SEL_WIN);
-			while(!selected_cell.indices.empty()) {
+			
+			for (int i = 0; i < selected_cell.indices.size(); i++) {
 				if (selected_cell.c == nullptr)
 					selected_cell.c = this;
-				int new_i = selected_cell.indices.back() + ((d.y != 0) ? d.y : d.x);
+				int new_i = selected_cell.indices[i] + ((d.y != 0) ? d.y : d.x);
 
-				if ((vertical ^ (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
+				if ((selected_cell.c->vertical != (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
 					alt_pressed = false;
-					set_selected(selected_cell.c->cells[new_i].window);
+					set_selected_cell(selected_cell.c->cells[new_i], selected_cell.indices[0]);
 					return;
 				}
 		
 				selected_cell.c = selected_cell.c->parent;
-				selected_cell.indices.pop_back();
+				//selected_cell.indices.erase(selected_cell.indices.begin());
 			}
 		}
 
@@ -231,10 +246,14 @@ namespace rwm_desktop {
 	cell root_cell = {nullptr, {}, false, nullptr};
 
 	void new_win(rwm::Window* win) {
+		cell::cell_index i;
+		if (SEL_WIN > 0) 
+			i = root_cell.find_cell_of(P_SEL_WIN);
+		else 
+			i = {nullptr, {}};
 		rwm::windows.push_back(win);
-		cell* current_cell = root_cell.find_cell_of(P_SEL_WIN).c;
-		current_cell = current_cell ? current_cell : &root_cell;
-		current_cell->add(P_SEL_WIN);
+		i.c = i.c ? i.c : &root_cell;
+		i.c->add(P_SEL_WIN, i);
 	}
 
 	void close_window(rwm::Window* win) {
@@ -367,6 +386,7 @@ namespace rwm_desktop {
 		curs_set(0);
 		touchwin(stdscr);
 		draw_taskbar();
+		root_cell.apply_tiled_mode();
 		refresh();
 		should_refresh = false;
 	} 
@@ -417,41 +437,47 @@ namespace rwm_desktop {
 			return true;
 
 			// Move window
-			case 'K':
+			case 'L':
 			move_selected_win({-1, 0});
 			return true;
 
-			case 'J':
+			case 'K':
 			move_selected_win({1, 0});
 			return true;
 
-			case 'H':
+			case 'J':
 			move_selected_win({0, -1});
 			return true;
 
-			case 'L':
+			case ':':
 			move_selected_win({0, 1});
 			return true;
 
 			// Move selection
-			case 'k':
+			case 'l':
 			root_cell.move_window_selection({-1, 0});
 			return true;
 
-			case 'j':
+			case 'k':
 			root_cell.move_window_selection({1, 0});
 			return true;
 
-			case 'h':
+			case 'j':
 			root_cell.move_window_selection({0, -1});
 			return true;
 
-			case 'l':
+			case ';':
 			root_cell.move_window_selection({0, 1});
 			return true;
 
-			case -1:
-				return true;
+			// Set mode
+			case 'v':
+			vertical_mode = true;
+			return true;
+
+			case 'h':
+			vertical_mode = false;
+			return true;
 
 			default:
 				break;
@@ -462,19 +488,19 @@ namespace rwm_desktop {
 		} else {
 			if (resize_mode & KEYBOARD) {
 			switch (key) {
-				case KEY_UP: case 'k':
+				case KEY_UP: case 'l':
 				P_SEL_WIN->resize({P_SEL_WIN->size.y - 1, P_SEL_WIN->size.x});
 				should_refresh = true;
 				return true;
-				case KEY_DOWN: case 'j':
+				case KEY_DOWN: case 'k':
 				P_SEL_WIN->resize({P_SEL_WIN->size.y + 1, P_SEL_WIN->size.x});
 				should_refresh = true;
 				return true;
-				case KEY_LEFT: case 'h':
+				case KEY_LEFT: case 'j':
 				P_SEL_WIN->resize({P_SEL_WIN->size.y, P_SEL_WIN->size.x - 1});
 				should_refresh = true;
 				return true;
-				case KEY_RIGHT: case 'l':
+				case KEY_RIGHT: case ';':
 				P_SEL_WIN->resize({P_SEL_WIN->size.y, P_SEL_WIN->size.x + 1});
 				should_refresh = true;
 				return true;
