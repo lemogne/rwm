@@ -22,10 +22,16 @@ namespace rwm_desktop {
 		CHANGE_Y = 8,
 		KEYBOARD = 16
 	};
+	enum tiled_modes {
+		WINDOWED = 0,
+		TILED = 1,
+		TABBED = 2,
+		STACKING = 3,
+	};
 	int resize_mode = OFF;
 	bool should_refresh = false;
 	bool alt_pressed = false;
-	bool tiled_mode = false;
+	int tiled_mode = 0;
 	bool vertical_mode = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::vector<std::string> desktop_contents = {};
@@ -36,6 +42,11 @@ namespace rwm_desktop {
 	void set_selected(rwm::Window* win) {
 		for (int i = 0; i < rwm::windows.size(); i++) {
 			if (rwm::windows[i] == win) {
+				if (tiled_mode == TABBED) {
+					if (P_SEL_WIN) 
+						P_SEL_WIN->status &= ~rwm::MAXIMIZED;
+					win->status |= rwm::MAXIMIZED;
+				}
 				rwm::set_selected(i);
 				should_refresh = true;
 				break;
@@ -205,7 +216,6 @@ namespace rwm_desktop {
 				}
 		
 				selected_cell.c = selected_cell.c->parent;
-				//selected_cell.indices.erase(selected_cell.indices.begin());
 			}
 		}
 
@@ -224,13 +234,22 @@ namespace rwm_desktop {
 					cells[i].do_tiled_mode(new_pos, new_size);
 				}
 			} else {
-				window->status &= ~rwm::MAXIMIZED;
-				rwm::ivec2 old_size = window->size;
-				rwm::ivec2 old_pos = window->pos;
-				window->resize(size);
-				window->move(pos);
-				window->size = old_size;
-				window->pos = old_pos;
+				if (tiled_mode == TABBED) {
+					window->status |= rwm::MAXIMIZED;
+					if (window != P_SEL_WIN)
+						window->status |= rwm::HIDDEN;
+					else
+						window->status &= ~rwm::HIDDEN;
+					window->maximize();
+				} else {
+					window->status &= ~(rwm::MAXIMIZED | rwm::HIDDEN);
+					rwm::ivec2 old_size = window->size;
+					rwm::ivec2 old_pos = window->pos;
+					window->resize(size);
+					window->move(pos);
+					window->size = old_size;
+					window->pos = old_pos;
+				}
 			}
 
 		}
@@ -430,7 +449,14 @@ namespace rwm_desktop {
 			return true;
 
 			case ' ': case 'e':
-			tiled_mode ^= true;
+			tiled_mode = (tiled_mode == TILED) ? WINDOWED : TILED;
+			alt_pressed = false;
+			root_cell.apply_tiled_mode();
+			should_refresh = true;
+			return true;
+		
+			case 'w':
+			tiled_mode = TABBED;
 			alt_pressed = false;
 			root_cell.apply_tiled_mode();
 			should_refresh = true;
