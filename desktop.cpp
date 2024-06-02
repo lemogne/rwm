@@ -479,6 +479,14 @@ namespace rwm_desktop {
 			vertical_mode = false;
 			return true;
 
+			case 'Q':
+			rwm::close_window(SEL_WIN);
+			return true;
+
+			case 'E':
+			rwm::terminate();
+			return true;
+
 			default:
 				break;
 			}
