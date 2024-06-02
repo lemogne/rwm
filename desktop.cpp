@@ -373,6 +373,7 @@ namespace rwm_desktop {
 			case 'r':
 			resize_mode ^= KEYBOARD;
 			alt_pressed = false;
+			should_refresh = true;
 			return true;
 
 			// Move window
@@ -609,7 +610,10 @@ namespace rwm_desktop {
 	}
 
 	void frame_render(rwm::Window& win, bool is_focused) {
-		if (rwm::utf8) {
+		if ((resize_mode & KEYBOARD) && is_focused) {
+			wattron(win.frame, A_REVERSE);
+			box(win.frame, '*', '*');
+		} else if (rwm::utf8) {
 			wattron(win.frame, A_REVERSE);
 			cchar_t vert_cc;
 			cchar_t horiz_cc;
