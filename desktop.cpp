@@ -604,6 +604,8 @@ namespace rwm_desktop {
 	}
 
 	bool update() {
+		if (tiled_mode && SEL_WIN >= 0)
+			rwm::selected_window = true;
 		return should_refresh;
 	}
 
