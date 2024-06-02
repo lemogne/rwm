@@ -151,14 +151,15 @@ namespace rwm {
 			wresize(alt_win, stdscr->_maxy - 2, stdscr->_maxx - 1);
 
 		} else {
-			wresize(win, size.y - 2, size.x - 2);
-			wresize(alt_win, size.y - 2, size.x - 2);
+			box(frame, ' ', ' ');
 			wresize(frame, size.y, size.x);
 			wresize(alt_frame, size.y, size.x);
-			mvwin(win, pos.y + 1, pos.x + 1);
-			mvwin(alt_win, pos.y + 1, pos.x + 1);
+			wresize(win, size.y - 2, size.x - 2);
+			wresize(alt_win, size.y - 2, size.x - 2);
 			mvwin(frame, pos.y, pos.x);
 			mvwin(alt_frame, pos.y, pos.x);
+			mvwin(win, pos.y + 1, pos.x + 1);
+			mvwin(alt_win, pos.y + 1, pos.x + 1);
 		}
 		winsize wsize;
 		rwm::ivec2 size_win = {win->_maxy + 1, win->_maxx + 1};
@@ -181,13 +182,13 @@ namespace rwm {
 	void Window::resize(ivec2 size) {
 		if (status & rwm::MAXIMIZED) 
 			return;
-		
+
 		this->size = size;
 		box(frame, ' ', ' ');
-		wresize(win, size.y - 2, size.x - 2);
-		wresize(alt_win, size.y - 2, size.x - 2);
 		wresize(frame, size.y, size.x);
 		wresize(alt_frame, size.y, size.x);
+		wresize(win, size.y - 2, size.x - 2);
+		wresize(alt_win, size.y - 2, size.x - 2);
 		winsize wsize;
 		rwm::ivec2 size_win = {win->_maxy + 1, win->_maxx + 1};
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)

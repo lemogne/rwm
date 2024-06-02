@@ -25,6 +25,7 @@ namespace rwm_desktop {
 	int resize_mode = OFF;
 	bool should_refresh = false;
 	bool alt_pressed = false;
+	bool tiled_mode = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
@@ -39,7 +40,6 @@ namespace rwm_desktop {
 				break;
 			}
 		}
-		//rwm::selected_window = true;
 	}
 
 	struct cell {
@@ -192,6 +192,39 @@ namespace rwm_desktop {
 				selected_cell.c = selected_cell.c->parent;
 				selected_cell.indices.pop_back();
 			}
+		}
+
+		void do_tiled_mode(rwm::ivec2 pos, rwm::ivec2 size) {
+			if (window == nullptr) {
+				for (int i = 0; i < cells.size(); i++) {
+					rwm::ivec2 new_pos;
+					rwm::ivec2 new_size;
+					if (vertical) {
+						new_size = {size.y / (int)cells.size(), size.x};
+						new_pos = {pos.y + new_size.y * i, pos.x};
+					} else { 
+						new_size = {size.y, size.x / (int)cells.size()};
+						new_pos = {pos.y, pos.x + new_size.x * i};
+					}
+					cells[i].do_tiled_mode(new_pos, new_size);
+				}
+			} else {
+				window->status &= ~rwm::MAXIMIZED;
+				rwm::ivec2 old_size = window->size;
+				rwm::ivec2 old_pos = window->pos;
+				window->resize(size);
+				window->move(pos);
+				window->size = old_size;
+				window->pos = old_pos;
+			}
+
+		}
+
+		void apply_tiled_mode() {
+			if (tiled_mode) 
+				do_tiled_mode({0, 0}, {stdscr->_maxy, stdscr->_maxx + 1});
+			else for (rwm::Window* win : rwm::windows) 
+				win->maximize();
 		}
 	};
 
@@ -373,6 +406,13 @@ namespace rwm_desktop {
 			case 'r':
 			resize_mode ^= KEYBOARD;
 			alt_pressed = false;
+			should_refresh = true;
+			return true;
+
+			case ' ': case 'e':
+			tiled_mode ^= true;
+			alt_pressed = false;
+			root_cell.apply_tiled_mode();
 			should_refresh = true;
 			return true;
 
@@ -628,7 +668,8 @@ namespace rwm_desktop {
 			box(win.frame, ACS_VLINE, ACS_HLINE);
 		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
-		mvwaddstr(win.frame, 0, win.frame->_maxx - 9, "[ - o x ]");
+		if (!tiled_mode)
+			mvwaddstr(win.frame, 0, win.frame->_maxx - 9, "[ - o x ]");
 		wattroff(win.frame, A_REVERSE);
 		draw_taskbar();
 	}
