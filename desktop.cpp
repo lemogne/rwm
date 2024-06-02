@@ -426,6 +426,87 @@ namespace rwm_desktop {
 		}
 	}
 
+
+	void d_menu() {
+		std::vector<std::string> input = {};
+		std::string current_input = "";
+		bool in_quotes = false;
+		bool escape = false;
+		std::string prompt_string = '>' + std::string(stdscr->_maxx - 11, ' ');
+		mvaddstr(stdscr->_maxy, 5, prompt_string.c_str());
+		echo();
+		move(stdscr->_maxy, 7);
+		while(true) {
+			int c = getch();
+			if (escape) {
+				switch(c) {
+					case 'n':
+					current_input += '\n';
+					break;
+					case 'b':
+					current_input += '\b';
+					break;
+					case 'r':
+					current_input += '\r';
+					break;
+					case 't':
+					current_input += '\t';
+					break;
+					case 'a':
+					current_input += '\a';
+					break;
+					case '"':
+					current_input += '"';
+					break;
+					case ' ':
+					current_input += ' ';
+					break;
+					case '0' ... '9':
+					current_input += (char) (c - '0');
+					break;
+				}
+				escape = false;
+				continue;	
+			}
+			switch(c) {
+				case '\n': case '\r': {
+					int offset = rwm::windows.size();
+					new_win(new rwm::Window{input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
+					draw_taskbar();
+					noecho();
+					return;
+				}
+
+				case 27:
+				draw_taskbar();
+				noecho();
+				return;
+
+				case 92:
+				escape = true;
+				continue;
+
+				case 34:
+				in_quotes ^= true;
+				continue;
+
+				case 32:
+				if (!in_quotes) {
+					input.push_back(current_input);
+					current_input = "";
+					continue;
+				}
+				//fallthrough;
+				case 33: case 35 ... 91: case 93 ... 255:
+				current_input += (char) c;
+				continue;
+
+				default:
+				continue;
+			}
+		}
+	}
+
 	bool key_priority(int key) {
 		if (alt_pressed) {
 			switch (key) {
@@ -503,6 +584,10 @@ namespace rwm_desktop {
 
 			case 'h':
 			vertical_mode = false;
+			return true;
+
+			case 'd':
+			d_menu();
 			return true;
 
 			case 'Q':
