@@ -212,8 +212,8 @@ namespace rwm_desktop {
 		void set_selected_cell(cell& cell, int j) {
 			if (cell.window)
 				set_selected(cell.window);
-			else {
-				j = std::min(j, (int) cell.cells.size());
+			else if (cell.cells.size() > 0) {
+				j = std::min(j, (int) (cell.cells.size() - 1));
 				set_selected_cell(cell.cells[j], 0);
 			}
 		}
