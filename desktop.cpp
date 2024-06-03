@@ -175,6 +175,23 @@ namespace rwm_desktop {
 			return nullptr;
 		}
 
+		int get_index(rwm::Window* win, int start_index = 0) {
+			if (window == nullptr) {
+				for (int j = 0; j < cells.size(); j++) {
+					int ccell = cells[j].get_index(win, start_index);
+					if (ccell < 0)
+						start_index -= ccell;
+					else 
+						return ccell;
+				}
+			} else {
+				if (window == win) 
+					return start_index;
+				return -1;
+			}
+			return -cells.size();
+		}
+
 
 		cell_index find_cell_of(rwm::Window* win) {
 			if (window == nullptr) {
@@ -203,20 +220,29 @@ namespace rwm_desktop {
 
 		void move_window_selection(rwm::ivec2 d) {
 			// Assuming d has at most one entry {-1, 1} and the other entry 0
-			cell_index selected_cell = find_cell_of(P_SEL_WIN);
-			
-			for (int i = 0; i < selected_cell.indices.size(); i++) {
-				if (selected_cell.c == nullptr)
-					selected_cell.c = this;
-				int new_i = selected_cell.indices[i] + ((d.y != 0) ? d.y : d.x);
+			if (tiled_mode == TILED) {
+				cell_index selected_cell = find_cell_of(P_SEL_WIN);
+				
+				for (int i = 0; i < selected_cell.indices.size(); i++) {
+					if (selected_cell.c == nullptr)
+						selected_cell.c = this;
+					int new_i = selected_cell.indices[i] + ((d.y != 0) ? d.y : d.x);
 
-				if ((selected_cell.c->vertical != (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
-					alt_pressed = false;
-					set_selected_cell(selected_cell.c->cells[new_i], selected_cell.indices[0]);
-					return;
+					if ((selected_cell.c->vertical != (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
+						alt_pressed = false;
+						set_selected_cell(selected_cell.c->cells[new_i], selected_cell.indices[0]);
+						return;
+					}
+			
+					selected_cell.c = selected_cell.c->parent;
 				}
-		
-				selected_cell.c = selected_cell.c->parent;
+			} else {
+				int i = get_index(P_SEL_WIN);
+				int new_i = i + d.x + d.y;
+				if (new_i >= 0) {
+					rwm::Window* new_win = get(new_i);
+					set_selected(new_win);
+				}
 			}
 		}
 
