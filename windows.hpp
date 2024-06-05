@@ -108,8 +108,8 @@ namespace rwm {
 	extern bool selected_window;              // Is a window selected (if so, it's the top window of `windows`)
 	void print_debug(std::string msg);        // Print debug message `msg` to stdscr
 
-	void set_color_rgb(char red_fg, char green_fg, char blue_fg, char red_bg, char green_bg, char blue_bg); // Set color (24 bit RGB)
-	void set_color_vga(uint8_t color_fg, uint8_t color_bg);                                                       // Set color (VGA)
+	void set_color_rgb(WINDOW* win, char red_fg, char green_fg, char blue_fg, char red_bg, char green_bg, char blue_bg); // Set color (24 bit RGB)
+	void set_color_vga(WINDOW* win, int color_fg, int color_bg);                                                       // Set color (VGA)
 }
 
 #endif

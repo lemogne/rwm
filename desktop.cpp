@@ -40,6 +40,9 @@ namespace rwm_desktop {
 	rwm::ivec2 spacing = {6, 10};
 	rwm::ivec2 click = {-1, -1};
 
+	// Colours 
+	int theme[2] = {-1, 12};
+
 	void set_selected(rwm::Window* win) {
 		for (int i = 0; i < rwm::windows.size(); i++) {
 			if (rwm::windows[i] == win) {
@@ -319,6 +322,11 @@ namespace rwm_desktop {
 		}
 	};
 
+	char icon_colors[2][2] = {
+		{-1, 7},
+		{-1, 11}
+	};
+
 	void draw_time() {
 		attron(A_REVERSE);
 		time_t t = std::time(nullptr);
@@ -332,6 +340,7 @@ namespace rwm_desktop {
 	void draw_taskbar() {
 		std::string bar = std::string(stdscr->_maxx + 1, ' ');
 		attron(A_REVERSE);
+		rwm::set_color_vga(stdscr, theme[1], theme[0]);
 		mvaddstr(stdscr->_maxy, 0, bar.c_str());
 		mvaddstr(stdscr->_maxy, 0, "[rwm]");
 		for (rwm::Window* pwin : root_cell) {
@@ -387,11 +396,13 @@ namespace rwm_desktop {
 		dirent* entry;
 		desktop_contents.clear();
 		while ((entry = readdir(dirp)) != NULL) {
+			int is_dir = (entry->d_type & DT_DIR) != 0;
+			rwm::set_color_vga(stdscr, icon_colors[is_dir][1], icon_colors[is_dir][0]);
 			for (int i = 0; i < 3; i++) {
-				int is_dir = (entry->d_type & DT_DIR) != 0;
 				wmove(stdscr, y + i, x);
 				rwm::waddstr_enc(stdscr, icons[is_dir][i]);
 			}
+			rwm::set_color_vga(stdscr, -1, -1);
 			std::string filename = entry->d_name;
 			desktop_contents.push_back(entry->d_name);
 			std::string display_name;
@@ -806,6 +817,7 @@ namespace rwm_desktop {
 			resize_mode |= (fpos.y == 0) ? DRAG_Y : OFF;
 			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
 			wattron(win.frame, A_REVERSE);
+			rwm::set_color_vga(stdscr, theme[1], theme[0]);
 			if (resize_mode & (CHANGE_X | CHANGE_Y)) 
 				box(win.frame, '*', '*');
 			else 
@@ -837,6 +849,7 @@ namespace rwm_desktop {
 	}
 
 	void frame_render(rwm::Window& win, bool is_focused) {
+		rwm::set_color_vga(win.frame, theme[1], theme[0]);
 		if ((resize_mode & KEYBOARD) && is_focused) {
 			wattron(win.frame, A_REVERSE);
 			box(win.frame, '*', '*');

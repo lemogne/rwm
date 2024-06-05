@@ -369,7 +369,7 @@ namespace rwm {
 		}
 	}
 
-	void set_color_rgb(char red_fg, char green_fg, char blue_fg, char red_bg, char green_bg, char blue_bg) {
+	void set_color_rgb(WINDOW* win, char red_fg, char green_fg, char blue_fg, char red_bg, char green_bg, char blue_bg) {
 
 	}
 
@@ -404,7 +404,7 @@ namespace rwm {
 		}
 	}
 
-	void set_color_vga(uint8_t color_fg, uint8_t color_bg) {
+	void set_color_vga(WINDOW* win, int color_fg, int color_bg) {
 		int bg = color_bg;
 		int fg = color_fg;
 		bg |= (bg >= 16) ? (1 << 24) : 0;
@@ -443,9 +443,9 @@ namespace rwm {
 			}
 		}
 		if (HAS_EXT_COLOR)
-			color_set(ipair, nullptr);
+			wcolor_set(win, ipair, nullptr);
 		else
-			attron(COLOR_PAIR(ipair));
+			wattron(win, COLOR_PAIR(ipair));
 	}
 
 	void Window::apply_color_pair() {
