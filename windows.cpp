@@ -369,6 +369,85 @@ namespace rwm {
 		}
 	}
 
+	void set_color_rgb(char red_fg, char green_fg, char blue_fg, char red_bg, char green_bg, char blue_bg) {
+
+	}
+
+	int create_vga_color(int color) {
+		int red, green, blue;
+		blue = color;
+		if (color < 16) {
+			return color;
+		} else if (color < 232) {
+			blue -= 16;
+			red = blue / 36;
+			green = blue / 6 - 6 * red;
+			blue %= 6;
+			red *= 51;
+			green *= 51;
+			blue *= 51;
+		} else {
+			blue -= 231;
+			blue *= 255;
+			blue /= 25;
+			red = green = blue;
+		}
+		if (can_change_color() && colors < max_colors) {
+			if (HAS_EXT_COLOR)
+				init_extended_color(colors, red * 1000 / 255, green * 1000 / 255, blue * 1000 / 255);
+			else
+				init_color(colors, red * 1000 / 255, green * 1000 / 255, blue * 1000 / 255);
+			color_map.insert_or_assign(color, colors);
+			return colors++;
+		} else {
+			return color_map.at(find_closest_color(red, green, blue));
+		}
+	}
+
+	void set_color_vga(uint8_t color_fg, uint8_t color_bg) {
+		int bg = color_bg;
+		int fg = color_fg;
+		bg |= (bg >= 16) ? (1 << 24) : 0;
+		fg |= (fg >= 16) ? (1 << 24) : 0;
+		uint64_t color = ((uint64_t) bg << 32) | fg;
+		auto pair = pair_map.find(color);
+		int ipair;
+		if (pair != pair_map.end()) {
+			ipair = pair->second;
+		} else {
+			// Factor out into function
+			int fg_no, bg_no;
+			auto fg_no_p = color_map.find(fg);
+			auto bg_no_p = color_map.find(bg);
+			if (fg_no_p != color_map.end())
+				fg_no = fg_no_p->second;
+			else {
+				fg_no = create_vga_color(color_fg);
+			}
+			if (bg_no_p != color_map.end())
+				bg_no = bg_no_p->second;
+			else {
+				bg_no = create_vga_color(color_bg);
+			}
+			if (color_pairs < max_color_pairs) {
+				if (HAS_EXT_COLOR) 
+					init_extended_pair(color_pairs, fg_no, bg_no);
+				else 
+					init_pair(color_pairs, fg_no, bg_no);
+				pair_map.insert_or_assign(color, color_pairs);
+				ipair = color_pairs;
+				color_pairs++;
+			} else {
+				color = find_closest_pair(bg_no, fg_no);
+				ipair = pair_map.at(color);
+			}
+		}
+		if (HAS_EXT_COLOR)
+			color_set(ipair, nullptr);
+		else
+			attron(COLOR_PAIR(ipair));
+	}
+
 	void Window::apply_color_pair() {
 		int fc = state.color & 0xffffffff;
 		int bc = state.color >> 32;
