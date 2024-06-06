@@ -12,8 +12,8 @@ do
 done
 
 if [ separatelib = 1 ]; then
-	g++ -shared -o libdesktop.so -fPIC desktop.cpp
-	g++ $args rwm.cpp windows.cpp charencoding.cpp -o rwm -lncursesw -L. -ldesktop
+	g++ --std=c++17 -shared -o libdesktop.so -fPIC desktop.cpp 
+	g++ --std=c++17 $args rwm.cpp windows.cpp charencoding.cpp -o rwm -lncursesw -L. -ldesktop -lutil
 else 
-	g++ $args rwm.cpp windows.cpp desktop.cpp charencoding.cpp -o rwm -lncursesw
+	g++ --std=c++17 $args rwm.cpp windows.cpp desktop.cpp charencoding.cpp -o rwm -lncursesw -lutil
 fi
