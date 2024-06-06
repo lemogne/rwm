@@ -460,8 +460,8 @@ namespace rwm_desktop {
 		if (rwm::selected_window) { 
 			P_SEL_WIN->move_by(d);
 			should_refresh = true;
-			alt_pressed = false;
 		}
+		alt_pressed = false;
 	}
 
 
@@ -518,6 +518,8 @@ namespace rwm_desktop {
 					rwm::selected_window = true;
 					draw_taskbar();
 					noecho();
+					if (tiled_mode == TILED)
+						should_refresh = true;
 					return;
 				}
 
@@ -614,39 +616,48 @@ namespace rwm_desktop {
 			// Move selection
 			case 'l':
 			root_cell.move_window_selection({-1, 0});
+			alt_pressed = false;
 			return true;
 
 			case 'k':
 			root_cell.move_window_selection({1, 0});
+			alt_pressed = false;
 			return true;
 
 			case 'j':
 			root_cell.move_window_selection({0, -1});
+			alt_pressed = false;
 			return true;
 
 			case ';':
 			root_cell.move_window_selection({0, 1});
+			alt_pressed = false;
 			return true;
 
 			// Set mode
 			case 'v':
 			vertical_mode = true;
+			alt_pressed = false;
 			return true;
 
 			case 'h':
 			vertical_mode = false;
+			alt_pressed = false;
 			return true;
 
 			case 'd':
 			d_menu();
+			alt_pressed = false;
 			return true;
 
 			case 'Q':
 			rwm::close_window(SEL_WIN);
+			alt_pressed = false;
 			return true;
 
 			case 'E':
 			rwm::terminate();
+			alt_pressed = false;
 			return true;
 
 			default:
