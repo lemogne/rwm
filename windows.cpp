@@ -126,7 +126,6 @@ namespace rwm {
 	void Window::render(bool is_focused) {
 		if (!(status & HIDDEN)) {
 			rwm_desktop::frame_render(*this, is_focused);
-			//touchwin(frame);
 			curs_set(state.cursor);
 			wnoutrefresh(frame);
 		}
@@ -170,11 +169,6 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
-		/*touchwin(frame);
-		touchwin(alt_frame);
-		touchwin(win);
-		touchwin(alt_win);
-		touchwin(stdscr);*/
 		wnoutrefresh(stdscr);
 		wnoutrefresh(frame);
 	}
@@ -685,7 +679,6 @@ namespace rwm {
 
 		mvwin(win, pos.y + offset.y, pos.x + offset.x);
 		mvwin(alt_win, pos.y + offset.y, pos.x + offset.x);
-		//touchwin(stdscr);
 	}
 
 	void Window::erase(char mode) {

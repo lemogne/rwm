@@ -466,8 +466,7 @@ namespace rwm_desktop {
 
 
 	void d_menu() {
-		std::vector<std::string> input = {};
-		std::string current_input = "";
+		std::string input = "";
 		bool in_quotes = false;
 		bool escape = false;
 		std::string prompt_string = " >" + std::string(stdscr->_maxx - 13, ' ');
@@ -476,50 +475,20 @@ namespace rwm_desktop {
 		move(stdscr->_maxy, 7);
 		while(true) {
 			int c = getch();
-			if (escape) {
-				switch(c) {
-					case 'n':
-					current_input += '\n';
-					break;
-					case 'b':
-					current_input += '\b';
-					break;
-					case 'r':
-					current_input += '\r';
-					break;
-					case 't':
-					current_input += '\t';
-					break;
-					case 'a':
-					current_input += '\a';
-					break;
-					case '"':
-					current_input += '"';
-					break;
-					case ' ':
-					current_input += ' ';
-					break;
-					case '0' ... '9':
-					current_input += (char) (c - '0');
-					break;
-				}
-				escape = false;
-				continue;	
-			}
 			switch(c) {
 				case '\n': case '\r': {
 					int status = 0;
-					if (!current_input.compare("@"))
+					if (input.back() == '@') {
 						status = rwm::NO_EXIT;
-					else
-						input.push_back(current_input);
+						input = input.substr(0, input.size() - 1);
+					}
+
 					int offset = rwm::windows.size();
-					new_win(new rwm::Window{input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, status});
+					new_win(new rwm::Window{{"bash", "-c", input}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, status});
 					rwm::selected_window = true;
 					draw_taskbar();
 					noecho();
-					if (tiled_mode == TILED)
-						should_refresh = true;
+					should_refresh = true;
 					return;
 				}
 
@@ -529,29 +498,14 @@ namespace rwm_desktop {
 				return;
 
 				case '\b': case KEY_BACKSPACE:
-				if (current_input.size() > 0) {
-					current_input = current_input.substr(0, current_input.size() - 1);
+				if (input.size() > 0) {
+					input = input.substr(0, input.size() - 1);
 					addstr(" \b");
 				}
 				continue;
 
-				case 92:
-				escape = true;
-				continue;
-
-				case 34:
-				in_quotes ^= true;
-				continue;
-
-				case 32:
-				if (!in_quotes) {
-					input.push_back(current_input);
-					current_input = "";
-					continue;
-				}
-				//fallthrough;
-				case 33: case 35 ... 91: case 93 ... 255:
-				current_input += (char) c;
+				case 32 ... 255:
+				input += (char) c;
 				continue;
 
 				default:

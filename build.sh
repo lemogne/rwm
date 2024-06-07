@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 rm -f -- libdesktop.so rwm
 separatelib=1
-args=""
+args="-O3"
 for i in "$@"
 do
 	if [ "$i" = "DEBUG" ]; then
