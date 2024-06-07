@@ -369,7 +369,7 @@ namespace rwm_desktop {
 		file.open(filename);
 		int y = pos.y;
 		move(y, pos.x);
-		refresh();
+		wnoutrefresh(stdscr);
 		while (getline(file, contents)) {
 			for (unsigned char c : contents) {
 				if (c == '\033')
@@ -444,7 +444,7 @@ namespace rwm_desktop {
 		touchwin(stdscr);
 		draw_taskbar();
 		root_cell.apply_tiled_mode();
-		refresh();
+		wnoutrefresh(stdscr);
 		should_refresh = false;
 	} 
 
@@ -834,7 +834,7 @@ namespace rwm_desktop {
 			else 
 				box(win.frame, '|', '-');
 			wattroff(win.frame, A_REVERSE);
-			wrefresh(win.frame);
+			wnoutrefresh(win.frame);
 			return true;
 		} else if (bstate & BUTTON1_RELEASED) {
 			if (resize_mode & (CHANGE_X | CHANGE_Y)) {

@@ -268,9 +268,10 @@ namespace rwm {
 					windows[i]->render(i == SEL_WIN);
 			}
 			if (SEL_WIN >= 0)
-				wrefresh(windows[SEL_WIN]->win);
+				wnoutrefresh(windows[SEL_WIN]->win);
 			else
 				selected_window = false;
+			doupdate();
 			
 			int c;
 			if (selected_window)
@@ -328,7 +329,7 @@ namespace rwm {
 						rwm_desktop::mouse_pressed(event);
 					move(event.y, event.x);
 				}
-				refresh();
+				wnoutrefresh(stdscr);
 				break;
 
 			case -1:

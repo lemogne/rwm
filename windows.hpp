@@ -78,6 +78,7 @@ namespace rwm {
 		int slave;              // Slave TTY file handle (unused)
 		int status;             // Window status bits
 		int mouse_mode = 0;     // Current mouse reporting mode; 0 = OFF; other = see https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+		bool should_refresh = true;
 	private:
 		int alt_win_no = 0;     // Index of alternate window buffer used
 		parser_state state{};   // Saved parser state

@@ -90,7 +90,7 @@ namespace rwm {
 		wtimeout(alt_win, 0);
 		idlok(alt_win, TRUE);
 		keypad(alt_win, TRUE);
-		wrefresh(alt_frame);
+		wnoutrefresh(alt_frame);
 
 		title = args[0];
 
@@ -126,9 +126,9 @@ namespace rwm {
 	void Window::render(bool is_focused) {
 		if (!(status & HIDDEN)) {
 			rwm_desktop::frame_render(*this, is_focused);
-			touchwin(frame);
+			//touchwin(frame);
 			curs_set(state.cursor);
-			wrefresh(frame);
+			wnoutrefresh(frame);
 		}
 	}
 
@@ -170,13 +170,13 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
-		touchwin(frame);
+		/*touchwin(frame);
 		touchwin(alt_frame);
 		touchwin(win);
 		touchwin(alt_win);
-		touchwin(stdscr);
-		refresh();
-		wrefresh(frame);
+		touchwin(stdscr);*/
+		wnoutrefresh(stdscr);
+		wnoutrefresh(frame);
 	}
 
 	void Window::resize(ivec2 size) {
@@ -198,13 +198,8 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
-		touchwin(frame);
-		touchwin(alt_frame);
-		touchwin(win);
-		touchwin(alt_win);
-		touchwin(stdscr);
-		refresh();
-		wrefresh(frame);
+		wnoutrefresh(stdscr);
+		wnoutrefresh(frame);
 	}
 
 
@@ -690,7 +685,7 @@ namespace rwm {
 
 		mvwin(win, pos.y + offset.y, pos.x + offset.x);
 		mvwin(alt_win, pos.y + offset.y, pos.x + offset.x);
-		touchwin(stdscr);
+		//touchwin(stdscr);
 	}
 
 	void Window::erase(char mode) {
@@ -783,12 +778,13 @@ namespace rwm {
 			x += 15;
 			y = 0;
 		}
-		refresh();
+		wnoutrefresh(stdscr);
 	}
 
 	int Window::output() {
 		int ret = sizeof buffer;
-		int should_refresh = 0;
+		int should_refresh = this->should_refresh;
+		this->should_refresh = false;
 		for (int i = 0; i < ret; i++) {
 			if (i == 0) {
 				pollfd p{master, POLLHUP, 1};
@@ -798,7 +794,7 @@ namespace rwm {
 
 				ret = read(master, buffer, sizeof buffer);
 				if (ret <= 0) 
-					return 0; // No data or closed
+					return should_refresh; // No data or closed
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
