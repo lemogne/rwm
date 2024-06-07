@@ -267,9 +267,8 @@ namespace rwm {
 				} else if ((windows[i]->status & FROZEN) && should_refresh)
 					windows[i]->render(i == SEL_WIN);
 			}
-			if (SEL_WIN >= 0)
-				wnoutrefresh(windows[SEL_WIN]->win);
-			else
+
+			if (SEL_WIN < 0)
 				selected_window = false;
 			doupdate();
 			
@@ -329,7 +328,6 @@ namespace rwm {
 						rwm_desktop::mouse_pressed(event);
 					move(event.y, event.x);
 				}
-				wnoutrefresh(stdscr);
 				break;
 
 			case -1:

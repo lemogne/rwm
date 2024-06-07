@@ -90,7 +90,6 @@ namespace rwm {
 		wtimeout(alt_win, 0);
 		idlok(alt_win, TRUE);
 		keypad(alt_win, TRUE);
-		wnoutrefresh(alt_frame);
 
 		title = args[0];
 
@@ -169,8 +168,6 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
-		wnoutrefresh(stdscr);
-		wnoutrefresh(frame);
 	}
 
 	void Window::resize(ivec2 size) {
@@ -192,8 +189,6 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
-		wnoutrefresh(stdscr);
-		wnoutrefresh(frame);
 	}
 
 
