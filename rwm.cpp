@@ -249,6 +249,7 @@ namespace rwm {
 
 	inline int main() {
 		init();
+		doupdate();
 		bool is_window_dragged = false;
 
 		while (true) {
@@ -270,7 +271,8 @@ namespace rwm {
 
 			if (SEL_WIN < 0)
 				selected_window = false;
-			doupdate();
+			if (should_refresh)
+				doupdate();
 			
 			int c;
 			if (selected_window)
