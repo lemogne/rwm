@@ -128,6 +128,12 @@ namespace rwm_desktop {
 				vertical = vertical_mode;
 				cells.push_back(new cell{window, {}, false, this});
 				window = nullptr;
+			} else if (cells.size() == 0) {
+				vertical = vertical_mode;
+				window = win;
+				return;
+			} else if (cells.size() == 1) {
+				vertical = vertical_mode;
 			} else if (vertical != vertical_mode) {
 				j.c->cells[j.indices.back()]->add(win, j);
 				return;
@@ -236,8 +242,21 @@ namespace rwm_desktop {
 
 				if ((selected_cell.c->vertical != (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
 					alt_pressed = false;
-					selected_cell.c->cells[new_i]->insert_cell(original_cell.c->cells[original_cell.indices[0]], selected_cell.indices[0]);
+					selected_cell.c->cells[new_i]->insert_cell(original_cell.c->cells[original_cell.indices[0]], new_i);
 					original_cell.c->cells.erase(original_cell.c->cells.begin() + original_cell.indices[0]);
+					if (original_cell.c->cells.size() == 1) {
+						if (original_cell.c->cells[0]->window) {
+							original_cell.c->window = original_cell.c->cells[0]->window;
+							original_cell.c->vertical = original_cell.c->cells[0]->vertical;
+							original_cell.c->cells.clear();
+						} else {
+							original_cell.c->vertical = original_cell.c->cells[0]->vertical;
+							original_cell.c->cells = original_cell.c->cells[0]->cells;
+							for (cell* c: original_cell.c->cells)
+								c->parent = original_cell.c;
+						}
+					}
+
 					return;
 				}
 
