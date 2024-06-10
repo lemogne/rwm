@@ -127,6 +127,7 @@ namespace rwm {
 			rwm_desktop::frame_render(*this, is_focused);
 			curs_set(state.cursor);
 			wnoutrefresh(frame);
+			wnoutrefresh(win);
 		}
 	}
 

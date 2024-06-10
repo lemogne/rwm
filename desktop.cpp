@@ -848,6 +848,7 @@ namespace rwm_desktop {
 				box(win.frame, '|', '-');
 			wattroff(win.frame, A_REVERSE);
 			wnoutrefresh(win.frame);
+			wnoutrefresh(win.win);
 			return true;
 		} else if (bstate & BUTTON1_RELEASED) {
 			if (resize_mode & (CHANGE_X | CHANGE_Y)) {
