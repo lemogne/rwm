@@ -10,6 +10,8 @@
 #include "rwm.h"
 #include "charencoding.hpp"
 #include <unistd.h>
+#include <algorithm>
+
 #define P_SEL_WIN (rwm::windows.back())
 
 namespace rwm_desktop {
@@ -81,7 +83,7 @@ namespace rwm_desktop {
 						index++;
 						delete it;
 						if (index < owner.cells.size())
-							it = new iterator(owner.cells[index], 0);
+							it = new iterator(*owner.cells[index], 0);
 						else
 							it = nullptr;
 					}
@@ -96,7 +98,7 @@ namespace rwm_desktop {
 			//protected:
 			iterator(cell& owner, int index) : owner (owner), index(index) {
 				if (owner.window == nullptr && owner.cells.size() > 0 && index < owner.cells.size())
-					it = new iterator(owner.cells[index], 0);
+					it = new iterator(*owner.cells[index], 0);
 				else
 					it = nullptr;
 			}
@@ -109,7 +111,7 @@ namespace rwm_desktop {
 			cell& owner;
 		};
 		rwm::Window* window;
-		std::vector<cell> cells{};
+		std::vector<cell*> cells{};
 		bool vertical;
 		cell* parent;
 
@@ -124,13 +126,13 @@ namespace rwm_desktop {
 		void add(rwm::Window* win, cell_index& j) {
 			if (window != nullptr) {
 				vertical = vertical_mode;
-				cells.push_back({window, {}, false, this});
+				cells.push_back(new cell{window, {}, false, this});
 				window = nullptr;
 			} else if (vertical != vertical_mode) {
-				j.c->cells[j.indices.back()].add(win, j);
+				j.c->cells[j.indices.back()]->add(win, j);
 				return;
 			}
-			cells.push_back({win, {}, false, this});
+			cells.push_back(new cell{win, {}, false, this});
 		}
 
 		int remove(rwm::Window* win) {
@@ -140,8 +142,9 @@ namespace rwm_desktop {
 			}
 			
 			for (int i = 0; i < cells.size(); i++) {
-				switch (cells[i].remove(win)) {
+				switch (cells[i]->remove(win)) {
 					case -1:
+					delete cells[i];
 					cells.erase(cells.begin() + i);
 					if (cells.size() == 0)
 						return -1;
@@ -152,8 +155,8 @@ namespace rwm_desktop {
 					return 1;
 
 					case 2:
-					cells[i] = cells[i].cells[0];
-					cells[i].parent = this;
+					cells[i] = cells[i]->cells[0];
+					cells[i]->parent = this;
 					return 1;
 
 					default: 
@@ -166,7 +169,7 @@ namespace rwm_desktop {
 		rwm::Window* get(int& i) {
 			if (window == nullptr) {
 				for (int j = 0; j < cells.size(); j++) {
-					rwm::Window* ccell = cells[j].get(i);
+					rwm::Window* ccell = cells[j]->get(i);
 					if (ccell != nullptr)
 						return ccell;
 				}
@@ -181,7 +184,7 @@ namespace rwm_desktop {
 		int get_index(rwm::Window* win, int start_index = 0) {
 			if (window == nullptr) {
 				for (int j = 0; j < cells.size(); j++) {
-					int ccell = cells[j].get_index(win, start_index);
+					int ccell = cells[j]->get_index(win, start_index);
 					if (ccell < 0)
 						start_index -= ccell;
 					else 
@@ -199,7 +202,7 @@ namespace rwm_desktop {
 		cell_index find_cell_of(rwm::Window* win) {
 			if (window == nullptr) {
 				for (int j = 0; j < cells.size(); j++) {
-					cell_index ccell = cells[j].find_cell_of(win);
+					cell_index ccell = cells[j]->find_cell_of(win);
 					if (ccell.c != nullptr) {
 						ccell.indices.push_back(j);
 						return ccell;
@@ -212,12 +215,42 @@ namespace rwm_desktop {
 			return {nullptr, {}};
 		}
 
-		void set_selected_cell(cell& cell, int j) {
-			if (cell.window)
-				set_selected(cell.window);
-			else if (cell.cells.size() > 0) {
-				j = std::min(j, (int) (cell.cells.size() - 1));
-				set_selected_cell(cell.cells[j], 0);
+		void insert_cell(cell* c, int j) {
+			if (window != nullptr) {
+				vertical = vertical_mode;
+				cells.push_back(new cell{window, {}, false, this});
+				window = nullptr;
+			}
+			j = std::clamp(j, 0, (int) this->cells.size());
+			cells.insert(cells.begin() + j, c);
+		}
+
+		void move_tile(rwm::ivec2 d) {
+			cell_index selected_cell = find_cell_of(P_SEL_WIN);
+			cell_index original_cell = selected_cell;
+			
+			for (int i = 0; i < selected_cell.indices.size(); i++) {
+				if (selected_cell.c == nullptr)
+					selected_cell.c = this;
+				int new_i = selected_cell.indices[i] + ((d.y != 0) ? d.y : d.x);
+
+				if ((selected_cell.c->vertical != (d.x != 0)) && 0 <= new_i && new_i < selected_cell.c->cells.size()) {
+					alt_pressed = false;
+					selected_cell.c->cells[new_i]->insert_cell(original_cell.c->cells[original_cell.indices[0]], selected_cell.indices[0]);
+					original_cell.c->cells.erase(original_cell.c->cells.begin() + original_cell.indices[0]);
+					return;
+				}
+
+				selected_cell.c = selected_cell.c->parent;
+			}
+		}
+
+		void set_selected_cell(cell* c, int j) {
+			if (c->window)
+				set_selected(c->window);
+			else if (c->cells.size() > 0) {
+				j = std::min(j, (int) (c->cells.size() - 1));
+				set_selected_cell(c->cells[j], 0);
 			}
 		}
 
@@ -261,7 +294,7 @@ namespace rwm_desktop {
 						new_size = {size.y, size.x / (int)cells.size()};
 						new_pos = {pos.y, pos.x + new_size.x * i};
 					}
-					cells[i].do_tiled_mode(new_pos, new_size);
+					cells[i]->do_tiled_mode(new_pos, new_size);
 				}
 			} else {
 				if (tiled_mode == TABBED) {
@@ -458,8 +491,13 @@ namespace rwm_desktop {
 
 	void move_selected_win(rwm::ivec2 d) {
 		if (rwm::selected_window) { 
-			P_SEL_WIN->move_by(d);
-			should_refresh = true;
+			if (tiled_mode == WINDOWED) {
+				P_SEL_WIN->move_by(d);
+				should_refresh = true;
+			} else if (tiled_mode == TILED) {
+				root_cell.move_tile(d);
+				should_refresh = true;
+			}
 		}
 		alt_pressed = false;
 	}
