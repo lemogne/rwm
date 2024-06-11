@@ -128,11 +128,15 @@ namespace rwm {
 			curs_set(state.cursor);
 			wnoutrefresh(frame);
 			wnoutrefresh(win);
+			should_refresh = false;
 		}
 	}
 
 	void Window::destroy() {
 		delwin(win);
+		delwin(frame);
+		delwin(alt_win);
+		delwin(alt_frame);
 		close(master);
 		kill(slave, SIGTERM);
 	}
@@ -169,6 +173,7 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
+		should_refresh = true;
 	}
 
 	void Window::resize(ivec2 size) {
@@ -190,6 +195,7 @@ namespace rwm {
 		wsize.ws_row = size_win.y;
 		wsize.ws_col = size_win.x;
 		ioctl(master, TIOCSWINSZ, (char *) &wsize);
+		should_refresh = true;
 	}
 
 

@@ -231,6 +231,7 @@ namespace rwm_desktop {
 			}
 			j = std::clamp(j, 0, (int) this->cells.size());
 			cells.insert(cells.begin() + j, c);
+			c->parent = this;
 		}
 
 		void move_tile(rwm::ivec2 d) {
@@ -249,7 +250,6 @@ namespace rwm_desktop {
 					if (original_cell.c->cells.size() == 1) {
 						if (original_cell.c->cells[0]->window) {
 							original_cell.c->window = original_cell.c->cells[0]->window;
-							//original_cell.c->vertical = original_cell.c->cells[0]->vertical;
 							original_cell.c->cells.clear();
 						} else {
 							original_cell.c->vertical = original_cell.c->cells[0]->vertical;
@@ -847,8 +847,9 @@ namespace rwm_desktop {
 			else 
 				box(win.frame, '|', '-');
 			wattroff(win.frame, A_REVERSE);
-			wnoutrefresh(win.frame);
-			wnoutrefresh(win.win);
+			wrefresh(win.frame);
+			wrefresh(win.win);
+			win.should_refresh = false;
 			return true;
 		} else if (bstate & BUTTON1_RELEASED) {
 			if (resize_mode & (CHANGE_X | CHANGE_Y)) {

@@ -202,6 +202,7 @@ namespace rwm {
 		status = "\033[I";
 		if (windows[SEL_WIN]->status & REPORT_FOCUS)
 			write(windows[SEL_WIN]->master, status.c_str(), status.size());
+		windows[SEL_WIN]->should_refresh = true;
 	}
 
 	void set_selected(int i) {
@@ -232,10 +233,10 @@ namespace rwm {
 	}
 
 	void close_window(int i) {
-		windows[i]->destroy();
-		rwm_desktop::close_window(windows[i]);
 		if (i == SEL_WIN) 
 			set_selected(-1);
+		windows[i]->destroy();
+		rwm_desktop::close_window(windows[i]);
 		delete windows[i];
 		windows.erase(windows.begin() + i);
 		full_refresh();
