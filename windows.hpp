@@ -76,6 +76,7 @@ namespace rwm {
 		ivec2 pos = {0, 0};     // Window (frame) position
 		int master;             // Master TTY file handle
 		int slave;              // Slave TTY file handle (unused)
+		int pid;                // Process ID
 		int status;             // Window status bits
 		int mouse_mode = 0;     // Current mouse reporting mode; 0 = OFF; other = see https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
 		bool should_refresh = true;

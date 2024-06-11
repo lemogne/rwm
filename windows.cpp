@@ -8,6 +8,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h> 
+#include <sys/wait.h>
 #include <vector>
 #include <unordered_map>
 #include <limits>
@@ -109,11 +110,11 @@ namespace rwm {
 		int flags = fcntl(master, F_GETFL, 0);
 		fcntl(master, F_SETFL, flags | O_NONBLOCK);
 
-		int fk = fork();
-		if (fk == -1) {
+		pid = fork();
+		if (pid == -1) {
 			// FAIL; needs to be handled properly
 			exit(1);
-		} else if (fk == 0) {
+		} else if (pid == 0) {
 			// CHILD
 			run_child(args, master, slave);
 		}
@@ -139,6 +140,8 @@ namespace rwm {
 		delwin(alt_frame);
 		close(master);
 		kill(slave, SIGTERM);
+		int exit_status;
+		waitpid(pid, &exit_status, WUNTRACED);
 	}
 
 	void Window::maximize() {

@@ -666,6 +666,7 @@ namespace rwm_desktop {
 			case 'Q':
 			rwm::close_window(SEL_WIN);
 			alt_pressed = false;
+			should_refresh = true;
 			return true;
 
 			case 'E':
