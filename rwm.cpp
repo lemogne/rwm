@@ -222,8 +222,8 @@ namespace rwm {
 			getbegyx(windows[i]->frame, y, x);
 			getmaxyx(windows[i]->frame, maxy, maxx);
 			if (!(windows[i]->status & HIDDEN) 
-			 && x <= pos.x && pos.x <= x + maxx
-			 && y <= pos.y && pos.y <= y + maxy)
+			 && x <= pos.x && pos.x < x + maxx
+			 && y <= pos.y && pos.y < y + maxy)
 			 	return i;
 		}
 		return -1;
@@ -234,8 +234,8 @@ namespace rwm {
 		int y, x, maxy, maxx;
 		getbegyx(f, y, x);
 		getmaxyx(f, maxy, maxx);
-		return x == pos.x || x + maxx == pos.x
-		    || y == pos.y || y + maxy == pos.y;
+		return x == pos.x || x + maxx - 1 == pos.x
+		    || y == pos.y || y + maxy - 1== pos.y;
 	}
 
 	void close_window(int i) {

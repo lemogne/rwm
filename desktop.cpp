@@ -340,7 +340,7 @@ namespace rwm_desktop {
 
 		void apply_tiled_mode() {
 			if (tiled_mode) 
-				do_tiled_mode({0, 0}, {getmaxy(stdscr), getmaxx(stdscr) + 1});
+				do_tiled_mode({0, 0}, {getmaxy(stdscr) - 1, getmaxx(stdscr)});
 			else for (rwm::Window* win : rwm::windows) 
 				win->maximize();
 		}
@@ -387,16 +387,16 @@ namespace rwm_desktop {
 		tm tm = *std::localtime(&t);
 		std::ostringstream oss;
 		oss << std::put_time(&tm, "%H:%M");
-		mvaddstr(getmaxy(stdscr), getmaxx(stdscr) - 5, oss.str().c_str());
+		mvaddstr(getmaxy(stdscr) - 1, getmaxx(stdscr) - 6, oss.str().c_str());
 		attroff(A_REVERSE);
 	}
 
 	void draw_taskbar() {
-		std::string bar = std::string(getmaxx(stdscr) + 1, ' ');
+		std::string bar = std::string(getmaxx(stdscr), ' ');
 		attron(A_REVERSE);
 		rwm::set_color_vga(stdscr, theme[1], theme[0]);
-		mvaddstr(getmaxy(stdscr), 0, bar.c_str());
-		mvaddstr(getmaxy(stdscr), 0, "[rwm]");
+		mvaddstr(getmaxy(stdscr) - 1, 0, bar.c_str());
+		mvaddstr(getmaxy(stdscr) - 1, 0, "[rwm]");
 		for (rwm::Window* pwin : root_cell) {
 			rwm::Window& win = *pwin;
 			if (pwin == P_SEL_WIN && rwm::selected_window) 
@@ -478,7 +478,7 @@ namespace rwm_desktop {
 			}
 			y += spacing.y;
 
-			if (y + spacing.y > getmaxy(stdscr)) {
+			if (y + spacing.y >= getmaxy(stdscr)) {
 				y = 1;
 				x += spacing.x;
 			}
@@ -528,10 +528,10 @@ namespace rwm_desktop {
 		std::string input = "";
 		bool in_quotes = false;
 		bool escape = false;
-		std::string prompt_string = " >" + std::string(getmaxx(stdscr) - 13, ' ');
-		mvaddstr(getmaxy(stdscr), 5, prompt_string.c_str());
+		std::string prompt_string = " >" + std::string(getmaxx(stdscr) - 14, ' ');
+		mvaddstr(getmaxy(stdscr) - 1, 5, prompt_string.c_str());
 		echo();
-		move(getmaxy(stdscr), 7);
+		move(getmaxy(stdscr) - 1, 7);
 		while(true) {
 			int c = getch();
 			switch(c) {
@@ -773,14 +773,14 @@ namespace rwm_desktop {
 
 	void mouse_pressed(MEVENT event) {
 		if (event.bstate & BUTTON1_RELEASED) {
-			if (event.y == getmaxy(stdscr)) {
+			if (event.y == getmaxy(stdscr) - 1) {
 				click_taskbar(event.x);
 				click = {-1, -1};
 			} else {
 				int x, y, y_lim, pos;
 				x = event.x / spacing.x;
 				y = event.y / spacing.y;
-				y_lim = (getmaxy(stdscr) - 1) / spacing.y;
+				y_lim = (getmaxy(stdscr) - 2) / spacing.y;
 				pos = y + y_lim * x;
 				if (x == click.x && y == click.y) {
 					if (pos < desktop_contents.size()) {
@@ -811,9 +811,9 @@ namespace rwm_desktop {
 		getmaxyx(win.frame, f_maxx, f_maxx);
 		rwm::ivec2 fpos = {pos.y - f_begy, pos.x - f_begx};
 		if (bstate & BUTTON1_PRESSED)  {
-			if (fpos.y == 0 && fpos.x >= f_maxx - 9 && fpos.x < f_maxx) {
+			if (fpos.y == 0 && fpos.x >= f_maxx - 10 && fpos.x < f_maxx - 1) {
 				should_refresh = true;
-				switch (fpos.x - f_maxx) {
+				switch (fpos.x - f_maxx + 1) {
 				case -8 ... -7:
 					// Minimize (TODO)
 					win.status |= rwm::HIDDEN;
@@ -899,7 +899,7 @@ namespace rwm_desktop {
 		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
 		if (!tiled_mode)
-			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 9, "[ - o x ]");
+			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 10, "[ - o x ]");
 		wattroff(win.frame, A_REVERSE);
 		draw_taskbar();
 	}
