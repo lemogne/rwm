@@ -218,9 +218,12 @@ namespace rwm {
 
 	int get_top_window(ivec2 pos) {
 		for (int i = windows.size() - 1; i >= 0; i--) {
+			int y, x, maxy, maxx;
+			getbegyx(windows[i]->frame, y, x);
+			getmaxyx(windows[i]->frame, maxy, maxx);
 			if (!(windows[i]->status & HIDDEN) 
-			 && windows[i]->frame->_begx <= pos.x && pos.x <= windows[i]->frame->_begx + windows[i]->frame->_maxx
-			 && windows[i]->frame->_begy <= pos.y && pos.y <= windows[i]->frame->_begy + windows[i]->frame->_maxy)
+			 && x <= pos.x && pos.x <= x + maxx
+			 && y <= pos.y && pos.y <= y + maxy)
 			 	return i;
 		}
 		return -1;
@@ -228,8 +231,11 @@ namespace rwm {
 
 	bool is_on_frame(ivec2 pos) {
 		WINDOW* f = windows[SEL_WIN]->frame;
-		return f->_begx == pos.x || f->_begx + f->_maxx == pos.x
-		    || f->_begy == pos.y || f->_begy + f->_maxy == pos.y;
+		int y, x, maxy, maxx;
+		getbegyx(f, y, x);
+		getmaxyx(f, maxy, maxx);
+		return x == pos.x || x + maxx == pos.x
+		    || y == pos.y || y + maxy == pos.y;
 	}
 
 	void close_window(int i) {
@@ -307,8 +313,10 @@ namespace rwm {
 						if (selected_window) {
 							switch (windows[SEL_WIN]->mouse_mode) {
 								case 1000: {
+									int x, y;
+									getbegyx(windows[SEL_WIN]->win, y, x);
 									char mouse_msg[6] = {'\033', '[', 'M', mouse_conversion.at(event.bstate & MOUSE_MASK), 
-										(char) (event.x- windows[SEL_WIN]->win->_begx + 33), (char) (event.y - windows[SEL_WIN]->win->_begy + 33)
+										(char) (event.x - x + 33), (char) (event.y - y + 33)
 									};
 									if (DEBUG)
 										print_debug(mouse_msg);
@@ -318,7 +326,7 @@ namespace rwm {
 
 								/*case 1006:
 								std::string mouse_msg = "\033[" + std::to_string(mouse_state & 3) + ';'
-									+ std::to_string(event.y- windows[SEL_WIN]->win->_begy + 1) + ';' + std::to_string(event.x - windows[SEL_WIN]->win->_begx + 1)
+									+ std::to_string(event.y- y + 1) + ';' + std::to_string(event.x - x + 1)
 									+ 'M';*/
 
 

@@ -151,10 +151,10 @@ namespace rwm {
 			mvwin(alt_frame, 0, 0);
 			mvwin(win, 1, 1);
 			mvwin(alt_win, 1, 1);
-			wresize(frame, stdscr->_maxy, stdscr->_maxx + 1);
-			wresize(alt_frame, stdscr->_maxy, stdscr->_maxx + 1);
-			wresize(win, stdscr->_maxy - 2, stdscr->_maxx - 1);
-			wresize(alt_win, stdscr->_maxy - 2, stdscr->_maxx - 1);
+			wresize(frame, getmaxy(stdscr), getmaxx(stdscr) + 1);
+			wresize(alt_frame, getmaxy(stdscr), getmaxx(stdscr) + 1);
+			wresize(win, getmaxy(stdscr) - 2, getmaxx(stdscr) - 1);
+			wresize(alt_win, getmaxy(stdscr) - 2, getmaxx(stdscr) - 1);
 
 		} else {
 			box(frame, ' ', ' ');
@@ -168,7 +168,7 @@ namespace rwm {
 			mvwin(alt_win, pos.y + 1, pos.x + 1);
 		}
 		winsize wsize;
-		rwm::ivec2 size_win = {win->_maxy + 1, win->_maxx + 1};
+		rwm::ivec2 size_win = {getmaxy(win) + 1, getmaxx(win) + 1};
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
 			printf("TIOCGWINSZ error");
 		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
@@ -190,7 +190,7 @@ namespace rwm {
 		wresize(win, size.y - 2, size.x - 2);
 		wresize(alt_win, size.y - 2, size.x - 2);
 		winsize wsize;
-		rwm::ivec2 size_win = {win->_maxy + 1, win->_maxx + 1};
+		rwm::ivec2 size_win = {getmaxy(win) + 1, getmaxx(win) + 1};
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
 			printf("TIOCGWINSZ error");
 		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
@@ -668,14 +668,14 @@ namespace rwm {
 	}
 
 	void Window::move_by(ivec2 d) {
-		move({frame->_begy + d.y, frame->_begx + d.x});
+		move({getbegy(frame) + d.y, getbegx(frame) + d.x});
 	}
 
 	void Window::move(ivec2 pos) {
 		if (status & rwm::MAXIMIZED)
 			return;
 
-		ivec2 offset = {win->_begy - frame->_begy, win->_begx - frame->_begx};
+		ivec2 offset = {getbegy(win) - getbegy(frame), getbegx(win) - getbegx(frame)};
 		int can_move = mvwin(frame, pos.y, pos.x);
 		if (can_move == ERR)
 			return;
@@ -752,15 +752,15 @@ namespace rwm {
 		scrollok(win, FALSE);
 		int x, y;
 		getyx(win, y, x);
-		int maxlen = win->_maxx - x + ((win->_maxy - y) * win->_maxx) + 1;
+		int maxlen = getmaxx(win) - x + ((getmaxy(win) - y) * getmaxx(win)) + 1;
 		waddstr(win, state.out.substr(0, maxlen).c_str());
 
-		for (int i = maxlen; i < state.out.length(); i += win->_maxx) {
+		for (int i = maxlen; i < state.out.length(); i += getmaxx(win)) {
 			scrollok(win, TRUE);
 			scroll(win);
 			wmove(win, y, 0);
 			scrollok(win, FALSE);
-			waddstr(win, state.out.substr(i, i + win->_maxx - 1).c_str());
+			waddstr(win, state.out.substr(i, i + getmaxx(win) - 1).c_str());
 		}
 		scrollok(win, TRUE);
 
@@ -772,7 +772,7 @@ namespace rwm {
 		static int y = 0;
 		mvaddstr(y, x, msg.c_str());
 		y++;
-		if (y > stdscr->_maxy) {
+		if (y > getmaxy(stdscr)) {
 			x += 15;
 			y = 0;
 		}
@@ -825,9 +825,10 @@ namespace rwm {
 							flush();
 							should_refresh = 1;
 						}
-						int x, y;
+						int x, y, top, bot;
 						getyx(win, y, x);
-						if (y >= win->_regbottom) {
+						wgetscrreg(win, &top, &bot);
+						if (y >= bot) {
 							scroll(win);
 							wmove(win, y, x);
 						} else {
@@ -884,9 +885,10 @@ namespace rwm {
 					erase(buffer[i]);
 					should_refresh = 1;
 				} else if (state.esc_type == '\x1B' && buffer[i] == 'M') {
-					int x, y;
+					int x, y, top, bot;
 					getyx(win, y, x);
-					if (y <= win->_regtop) {
+					wgetscrreg(win, &top, &bot);
+					if (y <= top) {
 						wscrl(win, -1);
 						wmove(win, y, x);
 					} else {
@@ -917,7 +919,7 @@ namespace rwm {
 						int n2 = (state.ctrl.size() > 1) ? std::max(state.ctrl[1], 0) : 0;
 						int margins[2];
 						margins[0] = (n1 == 0) ? 0 : n1 - 1;
-						margins[1] = (n2 == 0) ? win->_maxy : n2 - 1;
+						margins[1] = (n2 == 0) ? getmaxy(win) : n2 - 1;
 						wsetscrreg(win, margins[0], margins[1]);
 					} else if (DEBUG) {
 						print_debug(state.esc_seq);
