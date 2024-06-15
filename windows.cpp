@@ -796,6 +796,8 @@ namespace rwm {
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
+				if (buffer[i] < 32)
+					print_debug(std::string(1, buffer[i]) + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
 					case '\x1B': case '\x9B' ... '\x9F':
 					if (state.out != "") {
@@ -883,6 +885,8 @@ namespace rwm {
 				case 's': case 'u': case 'n': case 'd':
 				if (state.esc_type == '[')
 					move_cursor(buffer[i]);
+				else if (state.esc_type == '(' && buffer[i] == 'B')
+					state.vt220 = false;
 				else if (DEBUG) {
 					print_debug(state.esc_seq);
 					should_refresh = 1;
@@ -974,7 +978,10 @@ namespace rwm {
 				continue;
 
 				case '0' ... '9':
-				if (state.esc_type == '\x1B') {
+				if (state.esc_type == '(' && buffer[i] == '0') {
+					state.vt220 = true;
+					break;
+				} else if (state.esc_type == '\x1B') {
 					if (DEBUG) {
 						print_debug(state.esc_seq);
 						should_refresh = 1;
@@ -988,6 +995,7 @@ namespace rwm {
 				continue;
 				}
 				state.is_text = true;
+				print_debug(state.esc_seq);
 				state.out = "";
 				continue;
 			}
