@@ -794,10 +794,7 @@ namespace rwm {
 				if (ret <= 0) 
 					return should_refresh; // No data or closed
 			}
-			if (state.vt220) {
-				state.out += NCURSES_ACS(buffer[i]);
-				state.vt220 = false;
-			} else if (state.is_text) {
+			if (state.is_text) {
 				state.esc_seq = "";
 				switch (buffer[i]) {
 					case '\x1B': case '\x9B' ... '\x9F':
@@ -850,6 +847,7 @@ namespace rwm {
 					continue;
 
 					case '\x0F':
+					state.vt220 = false;
 					continue;
 
 					case '\b':
@@ -863,7 +861,8 @@ namespace rwm {
 					default:
 					break;
 				}
-				state.out += buffer[i];
+				state.out += state.vt220 ? NCURSES_ACS(buffer[i]) : buffer[i];
+				state.vt220 = false;
 			} else {
 				state.esc_seq += buffer[i];
 				if (state.esc_type == '\xFF') {

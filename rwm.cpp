@@ -153,7 +153,7 @@ namespace rwm {
 		set_escdelay(0);
 		mouseinterval(0);
 		timeout(0);
-		bold_mode = BOLD;
+		bold_mode = BRIGHT_FG;
 
 		if (has_colors()) {
 			start_color();
