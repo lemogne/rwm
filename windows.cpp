@@ -861,8 +861,11 @@ namespace rwm {
 					default:
 					break;
 				}
-				state.out += state.vt220 ? vt220[buffer[i]] : buffer[i];
-				state.vt220 = false;
+				if (state.vt220) {
+					flush();
+					waddch(win, NCURSES_ACS(buffer[i]));
+				} else
+					state.out += buffer[i];
 			} else {
 				state.esc_seq += buffer[i];
 				if (state.esc_type == '\xFF') {
