@@ -24,7 +24,6 @@ namespace rwm {
 	};
 
 	std::unordered_map<std::string, chtype> acs;
-	std::unordered_map<char, chtype> vt220;
 
 	void init_encoding() {
 		acs = {
@@ -85,39 +84,6 @@ namespace rwm {
 			{"╗", ACS_URCORNER},
 			{"╲", '\\'},
 			{"╱", '/'},
-		};
-
-		vt220 = {
-			{'a', ACS_DIAMOND},
-			{'b', ACS_CKBOARD},
-			{'c', '\t'},
-			{'d', '\f'},
-			{'e', '\r'},
-			{'f', '\n'},
-			{'g', ACS_DEGREE},
-			{'h', ACS_PLMINUS},
-			{'i', '\n'},
-			{'i', '\v'},
-			{'j', ACS_LRCORNER},
-			{'k', ACS_URCORNER},
-			{'l', ACS_ULCORNER},
-			{'m', ACS_LLCORNER},
-			{'n', ACS_PLUS},
-			{'o', ACS_S1},
-			{'p', ACS_S3},
-			{'q', ACS_HLINE},
-			{'r', ACS_S7},
-			{'s', ACS_S9},
-			{'t', ACS_LTEE},
-			{'u', ACS_RTEE},
-			{'v', ACS_BTEE},
-			{'w', ACS_TTEE},
-			{'x', ACS_VLINE},
-			{'y', ACS_LEQUAL},
-			{'z', ACS_GEQUAL},
-			{'{', ACS_PI},
-			{'|', ACS_NEQUAL},
-			{'}', ACS_STERLING},
 		};
 	}
 
