@@ -24,6 +24,7 @@ namespace rwm {
 	};
 
 	std::unordered_map<std::string, chtype> acs;
+	bool force_convert = false;
 
 	void init_encoding() {
 		acs = {
@@ -90,11 +91,12 @@ namespace rwm {
 	bool utf8 = true;
 
 	void waddstr_enc(WINDOW* win, std::string string) {
-		if (utf8) 
+		if (utf8 && !force_convert) 
 			waddstr(win, string.c_str());
 		else {
 			std::string out = "";
 			std::string utfchar = "";
+			int n_cont_bytes = 0;
 			for (char c : string) {
 				if(utfchar.empty()) {
 					if (c >= 0) 
@@ -103,6 +105,12 @@ namespace rwm {
 						waddstr(win, out.c_str());
 						utfchar += c;
 						out = "";
+						n_cont_bytes = 
+							 ((c & 0xe0) ==  0xc0) ? 2 
+							:((c & 0xf0) ==  0xe0) ? 3
+							:((c & 0xf8) ==  0xf0) ? 4
+							:((c & 0xfc) ==  0xf8) ? 5
+							:((c & 0xfe) ==  0xfc) ? 6 : 7;
 					}
 				} else {
 					utfchar += c;
@@ -116,8 +124,8 @@ namespace rwm {
 						waddch(win, ' ');
 						attroff(A_REVERSE);
 						utfchar = "";
-					} else if (utfchar.length() > 4) {
-						waddstr(win, utfchar.c_str());
+					} else if (utfchar.length() >= n_cont_bytes) {
+						waddstr(win, "?");
 						utfchar = "";
 					}
 				}

@@ -753,14 +753,14 @@ namespace rwm {
 		int x, y;
 		getyx(win, y, x);
 		int maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
-		waddstr(win, state.out.substr(0, maxlen).c_str());
+		waddstr_enc(win, state.out.substr(0, maxlen));
 
 		for (int i = maxlen; i < state.out.length(); i += getmaxx(win) - 1) {
 			scrollok(win, TRUE);
 			scroll(win);
 			wmove(win, y, 0);
 			scrollok(win, FALSE);
-			waddstr(win, state.out.substr(i, i + getmaxx(win) - 2).c_str());
+			waddstr_enc(win, state.out.substr(i, i + getmaxx(win) - 2));
 		}
 		scrollok(win, TRUE);
 
