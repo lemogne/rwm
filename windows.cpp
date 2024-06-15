@@ -796,7 +796,7 @@ namespace rwm {
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
-				if (buffer[i] < 32)
+				if (buffer[i] < 32 && DEBUG)
 					print_debug(std::string(1, buffer[i]) + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
 					case '\x1B': case '\x9B' ... '\x9F':
@@ -995,7 +995,8 @@ namespace rwm {
 				continue;
 				}
 				state.is_text = true;
-				print_debug(state.esc_seq);
+				if (DEBUG)
+					print_debug(state.esc_seq);
 				state.out = "";
 				continue;
 			}
