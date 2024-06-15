@@ -861,7 +861,7 @@ namespace rwm {
 					default:
 					break;
 				}
-				state.out += state.vt220 ? NCURSES_ACS(buffer[i]) : buffer[i];
+				state.out += state.vt220 ? vt220[buffer[i]] : buffer[i];
 				state.vt220 = false;
 			} else {
 				state.esc_seq += buffer[i];
