@@ -841,6 +841,10 @@ namespace rwm {
 					}
 					continue;
 
+					case 14:
+					state.vt220 = true;
+					continue;
+
 					case '\a':
 					beep();
 					continue;
@@ -887,11 +891,6 @@ namespace rwm {
 				if (state.esc_type == '[') {
 					erase(buffer[i]);
 					should_refresh = 1;
-				} else if (state.esc_type == '\x1B' && buffer[i] == 'N') { 
-					state.vt220 = true;
-					should_refresh = 1;
-					state.is_text = true;
-					state.out = "";
 				} else if (state.esc_type == '\x1B' && buffer[i] == 'M') {
 					int x, y, top, bot;
 					getyx(win, y, x);
