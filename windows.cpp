@@ -794,7 +794,10 @@ namespace rwm {
 				if (ret <= 0) 
 					return should_refresh; // No data or closed
 			}
-			if (state.is_text) {
+			if (state.vt220) {
+				state.out += NCURSES_ACS(buffer[i]);
+				state.vt220 = false;
+			} else if (state.is_text) {
 				state.esc_seq = "";
 				switch (buffer[i]) {
 					case '\x1B': case '\x9B' ... '\x9F':
@@ -884,6 +887,11 @@ namespace rwm {
 				if (state.esc_type == '[') {
 					erase(buffer[i]);
 					should_refresh = 1;
+				} else if (state.esc_type == '\x1B' && buffer[i] == 'N') { 
+					state.vt220 = true;
+					should_refresh = 1;
+					state.is_text = true;
+					state.out = "";
 				} else if (state.esc_type == '\x1B' && buffer[i] == 'M') {
 					int x, y, top, bot;
 					getyx(win, y, x);

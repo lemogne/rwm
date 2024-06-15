@@ -54,6 +54,7 @@ namespace rwm {
 
 	struct parser_state {
 		bool is_text = true;               // Currently reading text or escape sequence?
+		bool vt220 = false;                // VT220 mode?
 		std::string out = "";              // Text to output; when in escape mode, additional string/char parameters
 		std::vector<int> ctrl = {};        // List of numerical values passed by control sequence
 		char esc_type = 0;                 // Character after ESC
