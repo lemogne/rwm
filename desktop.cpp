@@ -381,14 +381,63 @@ namespace rwm_desktop {
 		{-1, 11}
 	};
 
-	void draw_time() {
+	struct Widget {
+		std::string draw_cmd;
+		std::string win_on_click;
+		rwm::ivec2 win_dim;
+		int widget_size = 0;
+
+		std::string get_str() {
+			// Source: https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+			char buffer[128];
+			std::string result = "";
+			FILE* pipe = popen(draw_cmd.c_str(), "r");
+			if (!pipe) throw std::runtime_error("popen() failed!");
+			try {
+				while (fgets(buffer, sizeof buffer, pipe) != NULL)
+					result += buffer;
+			} catch (...) {
+				pclose(pipe);
+				throw;
+			}
+			pclose(pipe);
+			result.erase(std::remove(result.begin(), result.end(), '\n'), result.cend());
+			widget_size = result.size();
+			return result;
+		}
+	};
+	std::vector<Widget> widgets{};
+
+	void draw_widgets() {
+		std::string w_string = "";
+		for (Widget& w : widgets) 
+			w_string += w.get_str();
 		attron(A_REVERSE);
-		time_t t = std::time(nullptr);
-		tm tm = *std::localtime(&t);
-		std::ostringstream oss;
-		oss << std::put_time(&tm, "%H:%M");
-		mvaddstr(getmaxy(stdscr) - 1, getmaxx(stdscr) - 6, oss.str().c_str());
+		mvaddstr(getmaxy(stdscr) - 1, getmaxx(stdscr) - w_string.length() - 1, w_string.c_str());
 		attroff(A_REVERSE);
+	}
+
+	void init_widgets() {
+		std::ifstream file;
+		std::string line;
+		std::string out;
+		file.open("widgets.cfg");
+		while (getline(file, line)) {
+			try {
+				std::stringstream line_ss(line);
+				Widget w;
+				std::string col1, col2;
+				getline(line_ss, w.draw_cmd, '\t');
+				getline(line_ss, w.win_on_click, '\t');
+				getline(line_ss, col1, '\t');
+				getline(line_ss, col2, '\t');
+				w.win_dim.y = std::stoi(col1);
+				w.win_dim.x = std::stoi(col2);
+				widgets.push_back(w);
+			} catch (...) {
+				widgets.push_back({"echo ERROR\\|", "", {0, 0}});
+			}
+		}
 	}
 
 	void draw_taskbar() {
@@ -411,7 +460,7 @@ namespace rwm_desktop {
 			}
 			addstr(('[' + display_title + ']').c_str());
 		}
-		draw_time();
+		draw_widgets();
 		attroff(A_REVERSE);
 	}
 
@@ -487,6 +536,7 @@ namespace rwm_desktop {
 
 	void init() {
 		//draw_background("./12_DEC23.ANS", {15, 50}, {1, 1});
+		init_widgets();
 		draw_icons();
 		draw_taskbar();
 		chdir(desktop_path.c_str());
@@ -523,6 +573,18 @@ namespace rwm_desktop {
 		alt_pressed = false;
 	}
 
+	void open_program(std::string input, rwm::ivec2 win_pos, rwm::ivec2 win_size) {
+		int status = 0;
+		if (input.back() == '@') {
+			status = rwm::NO_EXIT;
+			input = input.substr(0, input.size() - 1);
+		}
+		new_win(new rwm::Window{{"bash", "-c", input}, win_pos, win_size, status});
+		P_SEL_WIN->title = input;
+		rwm::selected_window = true;
+		noecho();
+		should_refresh = true;
+	}
 
 	void d_menu() {
 		std::string input = "";
@@ -536,18 +598,8 @@ namespace rwm_desktop {
 			int c = getch();
 			switch(c) {
 				case '\n': case '\r': {
-					int status = 0;
-					if (input.back() == '@') {
-						status = rwm::NO_EXIT;
-						input = input.substr(0, input.size() - 1);
-					}
-
 					int offset = rwm::windows.size();
-					new_win(new rwm::Window{{"bash", "-c", input}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, status});
-					P_SEL_WIN->title = input;
-					rwm::selected_window = true;
-					noecho();
-					should_refresh = true;
+					open_program(input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
 					return;
 				}
 
@@ -751,7 +803,7 @@ namespace rwm_desktop {
 		int pos = (x - 4) / (tab_size + 2);
 		if (x <= 4) {
 			// [rwm] menu
-		} else if (pos < rwm::windows.size()){
+		} else if (pos < rwm::windows.size()) {
 			rwm::Window* win = root_cell.get(pos);
 			if (pos == SEL_WIN && rwm::selected_window) {
 				win->status |= rwm::HIDDEN;
@@ -768,6 +820,17 @@ namespace rwm_desktop {
 				rwm::selected_window = true;
 			}
 			should_refresh = true;
+		} else {
+			// Widget clicked
+			int p = getmaxx(stdscr) - 1;
+			for (int i = widgets.size() - 1; i >= 0; i--) {
+				p -= widgets[i].widget_size;
+				if (x >= p) {
+					rwm::ivec2 win_pos = {getmaxy(stdscr) - widgets[i].win_dim.y - 1, getmaxx(stdscr) - widgets[i].win_dim.x};
+					open_program(widgets[i].win_on_click, win_pos, widgets[i].win_dim);
+					break;
+				}
+			}
 		}
 	}
 
