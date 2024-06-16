@@ -117,7 +117,7 @@ namespace rwm_desktop {
 
 		iterator begin() {return iterator(*this, 0);}
 
-		iterator end() {return iterator(*this, cells.size());}
+		iterator end() {return iterator(*this, (this->window == nullptr) ? cells.size() : 1);}
 
 		struct cell_index {
 			cell* c;
@@ -544,8 +544,8 @@ namespace rwm_desktop {
 
 					int offset = rwm::windows.size();
 					new_win(new rwm::Window{{"bash", "-c", input}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, status});
+					P_SEL_WIN->title = input;
 					rwm::selected_window = true;
-					draw_taskbar();
 					noecho();
 					should_refresh = true;
 					return;
@@ -807,8 +807,8 @@ namespace rwm_desktop {
 	bool frame_click(int i, rwm::ivec2 pos, int bstate) {
 		rwm::Window& win = *rwm::windows[i];
 		int f_begx, f_begy, f_maxx, f_maxy;
-		getbegyx(win.frame, f_begx, f_begx);
-		getmaxyx(win.frame, f_maxx, f_maxx);
+		getbegyx(win.frame, f_begy, f_begx);
+		getmaxyx(win.frame, f_maxy, f_maxx);
 		rwm::ivec2 fpos = {pos.y - f_begy, pos.x - f_begx};
 		if (bstate & BUTTON1_PRESSED)  {
 			if (fpos.y == 0 && fpos.x >= f_maxx - 10 && fpos.x < f_maxx - 1) {
