@@ -24,71 +24,64 @@ namespace rwm {
 		"≡", "±", "≥", "≤", "⌠", "⌡", "÷", "≈", "°", "∙", "·", "√", "ⁿ", "²", "■", " "
 	};
 
-	std::unordered_map<std::string, chtype> acs;
+	std::unordered_map<std::string, cchar_t*> acs;
 	std::unordered_map<std::string, std::string> lat_sup_a;
 	std::unordered_map<std::string, std::string> utf8_conv;
+	std::vector<std::string> reverse_video_chars;
 	bool force_convert = false;
 
 	void init_encoding() {
 		acs = {
-			{"■", ACS_BLOCK},
-			{"┴", ACS_BTEE},
-			{"╧", ACS_BTEE},
-			{"╨", ACS_BTEE},
-			{"╩", ACS_BTEE},
-			{"▒", ACS_BOARD},
-			{"░", ACS_CKBOARD},
-			{"↓", ACS_DARROW},
-			{"°", ACS_DEGREE},
-			{"♦", ACS_DIAMOND},
-			{"≥", ACS_GEQUAL},
-			{"─", ACS_HLINE},
-			{"☼", ACS_LANTERN},
-			{"←", ACS_LARROW},
-			{"≤", ACS_LEQUAL},
-			{"└", ACS_LLCORNER},
-			{"╙", ACS_LLCORNER},
-			{"╘", ACS_LLCORNER},
-			{"╚", ACS_LLCORNER},
-			{"┘", ACS_LRCORNER},
-			{"╜", ACS_LRCORNER},
-			{"╛", ACS_LRCORNER},
-			{"╝", ACS_LRCORNER},
-			{"├", ACS_LTEE},
-			{"╟", ACS_LTEE},
-			{"╞", ACS_LTEE},
-			{"╠", ACS_LTEE},
-			{"≠", ACS_NEQUAL},
-			{"π", ACS_PI},
-			{"±", ACS_PLMINUS},
-			{"┼", ACS_PLUS},
-			{"╪", ACS_PLUS},
-			{"╫", ACS_PLUS},
-			{"╬", ACS_PLUS},
-			{"→", ACS_RARROW},
-			{"┤", ACS_RTEE},
-			{"╢", ACS_RTEE},
-			{"╡", ACS_RTEE},
-			{"╣", ACS_RTEE},
-			{"£", ACS_STERLING},
-			{"┬", ACS_TTEE},
-			{"╤", ACS_TTEE},
-			{"╥", ACS_TTEE},
-			{"╦", ACS_TTEE},
-			{"↑", ACS_UARROW},
-			{"┌", ACS_ULCORNER},
-			{"╓", ACS_ULCORNER},
-			{"╒", ACS_ULCORNER},
-			{"╔", ACS_ULCORNER},
-			{"┐", ACS_URCORNER},
-			{"╖", ACS_URCORNER},
-			{"╕", ACS_URCORNER},
-			{"╗", ACS_URCORNER},
-			{"│", ACS_VLINE},
-			{"╗", ACS_URCORNER},
-			{"╲", '\\'},
-			{"╱", '/'},
+			{"■", WACS_BLOCK},
+			{"┴", WACS_BTEE}, {"╧", WACS_D_BTEE}, {"╨", WACS_D_BTEE}, {"╩", WACS_D_BTEE},
+			{"┵", WACS_BTEE}, {"┶", WACS_BTEE}, {"┸", WACS_BTEE},
+			{"┷", WACS_T_BTEE}, {"┹", WACS_T_BTEE}, {"┺", WACS_T_BTEE}, {"┻", WACS_T_BTEE},
+			{"▒", WACS_BOARD},
+			{"░", WACS_CKBOARD},
+			{"↓", WACS_DARROW},
+			{"°", WACS_DEGREE},
+			{"♦", WACS_DIAMOND},
+			{"◆", WACS_DIAMOND},
+			{"≥", WACS_GEQUAL},
+			{"─", WACS_HLINE}, {"═", WACS_D_HLINE}, {"━", WACS_T_HLINE},
+			{"☼", WACS_LANTERN},
+			{"←", WACS_LARROW},
+			{"≤", WACS_LEQUAL},
+			{"└", WACS_LLCORNER}, {"╙", WACS_D_LLCORNER}, {"╘", WACS_D_LLCORNER}, {"╚", WACS_D_LLCORNER},
+			{"┕", WACS_T_LLCORNER}, {"┖", WACS_T_LLCORNER}, {"┗", WACS_T_LLCORNER},
+			{"┘", WACS_LRCORNER}, {"╜", WACS_D_LRCORNER}, {"╛", WACS_D_LRCORNER}, {"╝", WACS_D_LRCORNER},
+			{"┙", WACS_T_LRCORNER}, {"┚", WACS_T_LRCORNER}, {"┛", WACS_T_LRCORNER},
+			{"├", WACS_LTEE}, {"╟", WACS_D_LTEE}, {"╞", WACS_D_LTEE}, {"╠", WACS_D_LTEE},
+			{"┝", WACS_LTEE},{"┞", WACS_LTEE},{"┟", WACS_LTEE},
+			{"┠", WACS_T_LTEE}, {"┡", WACS_T_LTEE}, {"┢", WACS_T_LTEE}, {"┣", WACS_T_LTEE},
+			{"≠", WACS_NEQUAL},
+			{"π", WACS_PI},
+			{"±", WACS_PLMINUS},
+			{"┼", WACS_PLUS}, {"╪", WACS_D_PLUS}, {"╫", WACS_D_PLUS}, {"╬", WACS_D_PLUS},
+			{"┽", WACS_PLUS}, {"┾", WACS_PLUS}, {"┿", WACS_PLUS}, {"╀", WACS_PLUS}, {"╁", WACS_PLUS}, 
+			{"╂", WACS_PLUS}, {"╃", WACS_PLUS}, {"╄", WACS_PLUS}, {"╅", WACS_PLUS}, {"╆", WACS_PLUS},
+			{"╇", WACS_T_PLUS}, {"╈", WACS_T_PLUS}, {"╉", WACS_T_PLUS}, {"╊", WACS_T_PLUS}, {"╋", WACS_T_PLUS},
+			{"→", WACS_RARROW},
+			{"┤", WACS_RTEE}, {"╢", WACS_D_RTEE}, {"╡", WACS_D_RTEE}, {"╣", WACS_D_RTEE},
+			{"┥", WACS_RTEE}, {"┦", WACS_RTEE}, {"┧", WACS_RTEE},
+			{"┨", WACS_T_RTEE}, {"┩", WACS_T_RTEE}, {"┪", WACS_T_RTEE}, {"┫", WACS_T_RTEE},	
+			{"£", WACS_STERLING},
+			{"┬", WACS_TTEE},{"╤", WACS_D_TTEE},{"╥", WACS_D_TTEE},{"╦", WACS_D_TTEE},
+			{"┭", WACS_TTEE}, {"┮", WACS_TTEE}, {"┰", WACS_TTEE},
+			{"┯", WACS_T_TTEE}, {"┱", WACS_T_TTEE}, {"┲", WACS_T_TTEE}, {"┳", WACS_T_TTEE},
+			{"↑", WACS_UARROW},
+			{"┌", WACS_ULCORNER}, {"╓", WACS_D_ULCORNER}, {"╒", WACS_D_ULCORNER}, {"╔", WACS_D_ULCORNER},
+			{"┍", WACS_T_ULCORNER}, {"┎", WACS_T_ULCORNER}, {"┏", WACS_T_ULCORNER},
+			{"┐", WACS_URCORNER},{"╖", WACS_D_URCORNER},{"╕", WACS_D_URCORNER},{"╗", WACS_D_URCORNER},
+			{"┑", WACS_T_URCORNER}, {"┒", WACS_T_URCORNER}, {"┓", WACS_T_URCORNER},
+			{"│", WACS_VLINE}, {"║", WACS_D_VLINE}, {"┃", WACS_T_VLINE},
+
+			{"▤", WACS_CKBOARD}, {"▥", WACS_CKBOARD}, {"▦", WACS_CKBOARD}, {"▧", WACS_CKBOARD},{"▨", WACS_CKBOARD}, 
+			{"▩", WACS_CKBOARD}, {"▪", WACS_BULLET}, {"▬", WACS_T_HLINE}, {"◼", WACS_BLOCK}, {"◾", WACS_BULLET},
+			{"▮", WACS_BLOCK}, {"◘", WACS_BULLET}, {"□", WACS_BLOCK}
 		};
+
+		reverse_video_chars = {"█", "▓", "◘", "◙", "□"};
 
 		lat_sup_a = {
 			{"¡", "!"},{"¢", "c"},{"¤", "*"},{"¥", "Y"},{"¦", "|"},
@@ -211,7 +204,23 @@ namespace rwm {
 			{"Ϡ", "S"},{"ϡ", "s"},{"Ϣ", "W"},{"ϣ", "w"},{"Ϥ", "q"},{"ϥ", "q"},{"Ϧ", "h"},{"ϧ", "s"},{"Ϩ", "S"},
 			{"ϩ", "s"},{"Ϫ", "D"},{"ϫ", "d"},{"Ϭ", "S"},{"ϭ", "s"},{"Ϯ", "T"},{"ϯ", "t"}, {"ϰ", "x"},{"ϱ", "r"},
 			{"ϲ", "c"},{"ϳ", "j"},{"ϴ", "8"},{"ϵ", "e"},{"϶", "e"},{"Ϸ", "Th"},{"ϸ", "th"},{"Ϲ", "C"},{"Ϻ", "M"},
-			{"ϻ", "m"},{"ϼ", "r"},{"Ͻ", "O"},{"Ͼ", "C"},{"Ͽ", "O"},};
+			{"ϻ", "m"},{"ϼ", "r"},{"Ͻ", "O"},{"Ͼ", "C"},{"Ͽ", "O"},
+			
+			// Graphical	
+			{"┄", "-"}, {"┅", "="}, {"┆", "|"}, {"┇", "|"}, {"┈", "-"}, {"┉", "-"}, {"┊", "|"}, {"┋", "|"},
+			{"╌", "-"}, {"╍", "="}, {"╎", "|"}, {"╏", "|"}, {"╲", "\\"},{"╱", "/"},
+ 			{"▭", "="}, {"▯", "?"}, {"▢", "O"}, {"▣", "?"}, {"▫", "o"},
+			{"▰", "?"}, {"▱", "?"}, {"▲", "^"}, {"△", "^"}, {"▴", "^"}, {"▵", "^"}, {"▶", ">"}, {"▷", ">"}, 
+			{"▸", ">"}, {"▹", ">"}, {"►", ">"}, {"▻", ">"}, {"▼", "v"}, {"▽", "v"}, {"▾", "v"}, {"▿", "v"}, 
+			{"◀", "<"}, {"◁", "<"}, {"◂", "<"}, {"◃", "<"}, {"◄", "<"}, {"◅", "<"},  {"◇", "o"}, 
+			{"◈", "?"}, {"◉", "o"}, {"◊", "?"}, {"○", "o"}, {"◌", "o"}, {"◍", "o"}, {"◎", "o"}, {"●", "o"}, 
+			{"◐", "o"}, {"◑", "o"}, {"◒", "o"}, {"◓", "o"}, {"◔", "o"}, {"◕", "o"}, {"◖", "c"}, {"◗", "o"}, 
+			{"◙", "o"}, {"◚", "?"}, {"◛", "?"}, {"◜", "?"}, {"◝", "?"}, {"◞", "?"}, {"◟", "?"}, 
+			{"◠", "^"}, {"◡", "u"}, {"◢", "?"}, {"◣", "?"}, {"◤", "?"}, {"◥", "?"}, {"◦", "o"}, {"◧", "?"}, 
+			{"◨", "?"}, {"◩", "?"}, {"◪", "?"}, {"◫", "?"}, {"◬", "^"}, {"◭", "^"}, {"◮", "^"}, {"◯", "o"}, 
+			{"◰", "?"}, {"◱", "?"}, {"◲", "?"}, {"◳", "?"}, {"◴", "o"}, {"◵", "o"}, {"◶", "o"}, {"◷", "o"}, 
+			{"◸", "?"}, {"◹", "?"}, {"◺", "?"}, {"◿", "?"},
+		};
 	}
 
 	bool utf8 = true;
@@ -245,8 +254,8 @@ namespace rwm {
 					auto itlsa = lat_sup_a.find(utfchar);
 					auto itutf8 = utf8_conv.find(utfchar);
 					if (it != acs.end()) {
-						chtype ch = it->second;
-						waddch(win, ch);
+						cchar_t* ch = it->second;
+						wadd_wch(win, ch);
 						utfchar = "";
 					} else if (no_lat_sup_a && itlsa != lat_sup_a.end()) {
 						std::string ch = itlsa->second;
