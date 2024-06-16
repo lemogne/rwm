@@ -870,7 +870,7 @@ namespace rwm_desktop {
 		auto now = std::chrono::system_clock::now().time_since_epoch();
     	long long time = std::chrono::duration_cast<std::chrono::seconds>(now).count();
 		if (time % 60 == 0 && !have_updated)
-			draw_taskbar();
+			should_refresh = true;
 		have_updated = (time % 60) == 0;
 
 		return should_refresh;
