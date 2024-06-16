@@ -538,7 +538,7 @@ namespace rwm_desktop {
 		//draw_background("./12_DEC23.ANS", {15, 50}, {1, 1});
 		init_widgets();
 		draw_icons();
-		draw_taskbar();
+		//draw_taskbar();
 		chdir(desktop_path.c_str());
 		return;
 	}
@@ -931,7 +931,6 @@ namespace rwm_desktop {
 					win.move_by({pos.y - drag_pos.y, 0});
 			} else
 				win.move_by({pos.y - drag_pos.y, pos.x - drag_pos.x});
-			draw_taskbar();
 			rwm::full_refresh();
 			drag_pos = {-1, -1};
 			should_refresh = false;
@@ -964,6 +963,5 @@ namespace rwm_desktop {
 		if (!tiled_mode)
 			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 10, "[ - o x ]");
 		wattroff(win.frame, A_REVERSE);
-		draw_taskbar();
 	}
 }
