@@ -11,6 +11,8 @@
 #include "charencoding.hpp"
 #include <unistd.h>
 #include <algorithm>
+#include <sys/stat.h>
+#include <iostream>
 
 #define P_SEL_WIN (rwm::windows.back())
 
@@ -496,6 +498,17 @@ namespace rwm_desktop {
 		int x = (spacing.x - 3) / 2;
 		int title_lines = 3;
 		DIR* dirp = opendir(desktop_path.c_str());
+		if (!dirp) {
+			if (errno == ENOENT) {
+				mkdir(desktop_path.c_str(), 0755);
+			} else {
+				echo();
+				if (has_colors())
+					use_default_colors();
+				endwin();
+				std::cerr << "Could not read Desktop!\n";
+			}
+		}
 		dirent* entry;
 		desktop_contents.clear();
 		while ((entry = readdir(dirp)) != NULL) {
