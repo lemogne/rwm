@@ -815,7 +815,8 @@ namespace rwm_desktop {
 	void click_taskbar(int x) {
 		int pos = (x - 4) / (tab_size + 2);
 		if (x <= 4) {
-			// [rwm] menu
+			// [rwm] 
+			d_menu();
 		} else if (pos < rwm::windows.size()) {
 			rwm::Window* win = root_cell.get(pos);
 			if (pos == SEL_WIN && rwm::selected_window) {
