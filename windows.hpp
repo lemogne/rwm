@@ -11,7 +11,7 @@
 #else
 #define HAS_EXT_COLOR false
 #endif
-#define DEBUG false
+#define DEBUG true
 
 namespace rwm {
 	enum {
@@ -102,6 +102,7 @@ namespace rwm {
 		void apply_color_pair();              // Applies color pair in attributes to text
 		void set_attrib();                    // Sets attributes based on control values
 		void do_osc();                        // Handle Operating System Control sequences
+		void do_dcs();                        // Handle Device Control String sequences
 		void do_private_seq(char mode);       // Handle private sequences
 		void move_cursor(char mode);          // Move cursor based on input char (for external API, use ncurses wmove(win, y, x))
 		void erase(char mode);                // Erase part of screen based on input char

@@ -28,7 +28,7 @@ namespace rwm {
 	std::unordered_map<std::string, std::string> lat_sup_a;
 	std::unordered_map<std::string, std::string> utf8_conv;
 	std::vector<std::string> reverse_video_chars;
-	bool force_convert = false;
+	bool force_convert = true;
 
 	void init_encoding() {
 		acs = {
@@ -279,6 +279,29 @@ namespace rwm {
 			waddstr(win, utfchar.c_str());
 			waddstr(win, out.c_str());
 		}
+	}
+
+	size_t utf8length(std::string string) {
+		//if (!utf8 || force_convert) 
+		//	return string.length();
+		size_t l = 0;
+		for (char c : string)
+ 			l += (c & 0xc0) != 0x80;
+		return l;
+	}
+
+	std::string utf8substr(std::string string, size_t start, size_t size) {
+		//if (!utf8 || force_convert) 
+		//	return string.substr(start, size);
+		size_t byte_start = 0, byte_size = 0, l = 0;
+		for (int i = 0; i < string.length(); i++) {
+			if (l <= start)
+				byte_start = i;
+			if (l - start < size)
+				byte_size = i - start;
+ 			l += (string[i] & 0xc0) != 0x80;
+		}
+		return string.substr(byte_start, byte_size + 1);
 	}
 
 	//void put_acs_char()

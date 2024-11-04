@@ -239,8 +239,11 @@ namespace rwm {
 	}
 
 	void close_window(int i) {
+		if (i < 0) 
+			return;
 		if (i == SEL_WIN) 
 			set_selected(-1);
+		
 		windows[i]->destroy();
 		rwm_desktop::close_window(windows[i]);
 		delete windows[i];
@@ -290,7 +293,7 @@ namespace rwm {
 			}
 
 			if (DEBUG && c != -1) {
-				print_debug(keyname(c) + (" " + std::to_string(c)));
+				print_debug(keyname(c) + (" " +  (c != 13 && c != 10) ? std::to_string(c) : "\\n"));
 			}
 			if (rwm_desktop::key_priority(c)) 
 				continue;

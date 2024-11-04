@@ -551,8 +551,15 @@ namespace rwm {
 	void Window::do_osc() {
 		if (state.ctrl[0] == 0 || state.ctrl[0] == 2) {
 			title = state.out;
+		} else if (state.ctrl[0] == 112) {
+			state.color = DEFAULT_COLOR;
 		}
 	}
+
+	void Window::do_dcs() {
+		char error_msg[] = "\033P0$r\033\\";
+		write(windows[SEL_WIN]->master, error_msg, sizeof(error_msg) - 1);
+	}	
 
 	void Window::do_private_seq(char mode) {
 		int n1;
@@ -585,6 +592,7 @@ namespace rwm {
 			}
 			break;
 
+			case 47:
 			case 1049:
 			case 1047:
 			if ((mode == 'h' && alt_win_no == 0) || (mode == 'l' && alt_win_no == 1)) {
@@ -726,6 +734,11 @@ namespace rwm {
 			winsdelln(win, -std::max(n1, 1));
 			break;
 
+			case 'P':
+			flush();
+			winsch(win, 127);
+			break;
+
 			case 'X': {
 				int x, y;
 				getyx(win, y, x);
@@ -753,14 +766,14 @@ namespace rwm {
 		int x, y;
 		getyx(win, y, x);
 		int maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
-		waddstr_enc(win, state.out.substr(0, maxlen));
+		waddstr_enc(win, utf8substr(state.out, 0, maxlen));
 
-		for (int i = maxlen; i < state.out.length(); i += getmaxx(win) - 1) {
+		for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
 			scrollok(win, TRUE);
 			scroll(win);
 			wmove(win, y, 0);
 			scrollok(win, FALSE);
-			waddstr_enc(win, state.out.substr(i, i + getmaxx(win) - 2));
+			waddstr_enc(win, utf8substr(state.out, i, i + getmaxx(win) - 2));
 		}
 		scrollok(win, TRUE);
 
@@ -770,7 +783,10 @@ namespace rwm {
 	void print_debug(std::string msg) {
 		static int x = 0;
 		static int y = 0;
-		mvaddstr(y, x, msg.c_str());
+		if (msg[0] == '[' && msg[1] == '2') {
+			x = x;
+		}
+		mvaddstr(y, x, (msg).c_str());
 		y++;
 		if (y >= getmaxy(stdscr)) {
 			x += 15;
@@ -797,7 +813,7 @@ namespace rwm {
 			if (state.is_text) {
 				state.esc_seq = "";
 				if (buffer[i] < 32 && DEBUG)
-					print_debug(std::string(1, buffer[i]) + ' ' + std::to_string((int) buffer[i]));
+					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
 					case '\x1B': case '\x9B' ... '\x9F':
 					if (state.out != "") {
@@ -879,6 +895,16 @@ namespace rwm {
 					} else
 						state.out += buffer[i];
 					continue;
+				} else if (state.esc_type == '\x90') {
+					if (buffer[i] == '\\') {
+						do_dcs();
+						if (DEBUG)
+							print_debug(state.esc_seq);
+						should_refresh = 1;
+						state.is_text = true;
+						state.out = "";
+					}
+					continue;
 				}
 				switch (buffer[i]) {
 				case 'A' ... 'H': case 'S' ... 'T': case 'f':
@@ -907,6 +933,9 @@ namespace rwm {
 					} else {
 						wmove(win, y - 1, x);
 					}
+				} else if (buffer[i] == 'P') {
+					state.esc_type = '\x90';
+					continue;
 				} else if (DEBUG) {
 					print_debug(state.esc_seq);
 					should_refresh = 1;
@@ -962,7 +991,7 @@ namespace rwm {
 				}
 				break;
 
-				case ';':
+				case ';': case ':':
 				if (state.esc_type == ']')
 					state.esc_type = '\xFF';
 				else
@@ -970,7 +999,7 @@ namespace rwm {
 				continue;
 
 				case '?': case '(': case ')':
-				case '[' ... '_': case '>': case '$':
+				case '[' ... '_': case '>': case '$': case ' ':
 				if (state.ctrl.size() < 1 && state.esc_type == '\x1B')
 					state.esc_type = buffer[i];
 				else

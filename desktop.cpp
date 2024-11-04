@@ -415,7 +415,7 @@ namespace rwm_desktop {
 		for (Widget& w : widgets) 
 			w_string += w.get_str();
 		attron(A_REVERSE);
-		mvaddstr(getmaxy(stdscr) - 1, getmaxx(stdscr) - w_string.length() - 1, w_string.c_str());
+		mvaddstr(getmaxy(stdscr) - 1, getmaxx(stdscr) - rwm::utf8length(w_string) - 1, w_string.c_str());
 		attroff(A_REVERSE);
 	}
 
