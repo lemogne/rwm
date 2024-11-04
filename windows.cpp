@@ -557,8 +557,8 @@ namespace rwm {
 	}
 
 	void Window::do_dcs() {
-		char error_msg[] = "\033P0$r\033\\";
-		write(windows[SEL_WIN]->master, error_msg, sizeof(error_msg) - 1);
+		//char error_msg[] = "\033P0$r\033\\";
+		//write(windows[SEL_WIN]->master, error_msg, sizeof(error_msg) - 1);
 	}	
 
 	void Window::do_private_seq(char mode) {
@@ -621,6 +621,7 @@ namespace rwm {
 		getyx(win, y, x);
 		n1 = (state.ctrl.size() > 0) ? std::max(state.ctrl[0], 1) : 1;
 		n2 = (state.ctrl.size() > 1) ? std::max(state.ctrl[1], 1) : 1;
+		//this->should_refresh = true;
 		switch (mode) {
 			case 'A':
 			wmove(win, y - n1, x);
@@ -736,7 +737,7 @@ namespace rwm {
 
 			case 'P':
 			flush();
-			winsch(win, 127);
+			wdelch(win);
 			break;
 
 			case 'X': {
@@ -783,9 +784,6 @@ namespace rwm {
 	void print_debug(std::string msg) {
 		static int x = 0;
 		static int y = 0;
-		if (msg[0] == '[' && msg[1] == '2') {
-			x = x;
-		}
 		mvaddstr(y, x, (msg).c_str());
 		y++;
 		if (y >= getmaxy(stdscr)) {
@@ -874,6 +872,7 @@ namespace rwm {
 						winsch(win, '\b');
 					else
 						waddch(win, '\b');
+					should_refresh = 1;
 					continue;
 
 					default:
