@@ -279,6 +279,8 @@ namespace rwm_desktop {
 
 		void move_window_selection(rwm::ivec2 d) {
 			// Assuming d has at most one entry {-1, 1} and the other entry 0
+			if (!rwm::selected_window)
+				return;
 			if (tiled_mode == TILED) {
 				cell_index selected_cell = find_cell_of(P_SEL_WIN);
 				
@@ -761,7 +763,7 @@ namespace rwm_desktop {
 			ungetch(27);
 			return true;
 		} else {
-			if (resize_mode & KEYBOARD) {
+			if (resize_mode & KEYBOARD && rwm::selected_window) {
 			switch (key) {
 				case KEY_UP: case 'l':
 				P_SEL_WIN->resize({P_SEL_WIN->size.y - 1, P_SEL_WIN->size.x});
