@@ -886,16 +886,19 @@ namespace rwm {
 			} else {
 				state.esc_seq += buffer[i];
 				if (state.esc_type == '\xFF') {
-					if (buffer[i] == '\7' || buffer[i] == '\x9C') {
-						do_osc();
-						should_refresh = 1;
-						state.is_text = true;
-						state.out = "";
-					} else
+					if (buffer[i] == '\7' || buffer[i] == '\x9C' || buffer[i] == '\\') {
+						if (buffer[i] != '\\' || state.esc_seq[state.esc_seq.length() - 2] == '\033') {
+							do_osc();
+							should_refresh = 1;
+							state.is_text = true;
+							state.out = "";
+						} else
+							state.out += '\033';
+					} else if (buffer[i] != '\033')
 						state.out += buffer[i];
 					continue;
 				} else if (state.esc_type == '\x90') {
-					if (buffer[i] == '\\') {
+					if (buffer[i] == '\\' || buffer[i] == '\7') {
 						do_dcs();
 						if (DEBUG)
 							print_debug(state.esc_seq);
