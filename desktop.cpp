@@ -674,6 +674,21 @@ namespace rwm_desktop {
 			should_refresh = true;
 			return true;
 
+			case 'f':
+			P_SEL_WIN->status ^= rwm::FULLSCREEN;
+			P_SEL_WIN->maximize();
+			should_refresh = true;
+			alt_pressed = false;
+			return true;
+
+			case 'm':
+			P_SEL_WIN->status ^= rwm::MAXIMIZED;
+			P_SEL_WIN->maximize();
+			should_refresh = true;
+			alt_pressed = false;
+			return true;
+
+
 			// Move window
 			case 'L':
 			move_selected_win({-1, 0});

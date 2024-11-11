@@ -93,7 +93,7 @@ namespace rwm {
 		void move(ivec2 pos);                                                      // Moves window to specified coordinates (absolute)
 		void move_by(ivec2 d);                                                     // Moves window by specified vector (relative)
 		void resize(ivec2 size);                                                   // Resizes window to new dimensions
-		void maximize();                                                           // Maximise or unmaximise window based on MAXIMIZED flag
+		void maximize();                                                           // Maximise or unmaximise window based on flags
 		void flush();                                                              // Flushes output in output buffer to window
 		void destroy();                                                            // Destroys window (use before deleting!)
 	private:

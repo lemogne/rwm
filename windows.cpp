@@ -125,7 +125,8 @@ namespace rwm {
 
 	void Window::render(bool is_focused) {
 		if (!(status & HIDDEN)) {
-			rwm_desktop::frame_render(*this, is_focused);
+			if (!(status & rwm::FULLSCREEN))
+				rwm_desktop::frame_render(*this, is_focused);
 			curs_set(state.cursor);
 			wnoutrefresh(frame);
 			wnoutrefresh(win);
@@ -145,7 +146,18 @@ namespace rwm {
 	}
 
 	void Window::maximize() {
-		if (status & rwm::MAXIMIZED) {
+		if (status & rwm::FULLSCREEN) {
+			box(frame, ' ', ' ');
+			mvwin(frame, 0, 0);
+			mvwin(alt_frame, 0, 0);
+			mvwin(win, 0, 0);
+			mvwin(alt_win, 0, 0);
+			wresize(frame, getmaxy(stdscr), getmaxx(stdscr));
+			wresize(alt_frame, getmaxy(stdscr), getmaxx(stdscr));
+			wresize(win, getmaxy(stdscr) - 1, getmaxx(stdscr) - 1);
+			wresize(alt_win, getmaxy(stdscr) - 1, getmaxx(stdscr) - 1);
+
+		} else if (status & rwm::MAXIMIZED) {
 			box(frame, ' ', ' ');
 			mvwin(frame, 0, 0);
 			mvwin(alt_frame, 0, 0);
@@ -180,7 +192,7 @@ namespace rwm {
 	}
 
 	void Window::resize(ivec2 size) {
-		if (status & rwm::MAXIMIZED) 
+		if (status & (rwm::MAXIMIZED | rwm::FULLSCREEN)) 
 			return;
 
 		this->size = size;
@@ -681,7 +693,7 @@ namespace rwm {
 	}
 
 	void Window::move(ivec2 pos) {
-		if (status & rwm::MAXIMIZED)
+		if (status & (rwm::MAXIMIZED | rwm::FULLSCREEN))
 			return;
 
 		ivec2 offset = {getbegy(win) - getbegy(frame), getbegx(win) - getbegx(frame)};
