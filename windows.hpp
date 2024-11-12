@@ -12,6 +12,7 @@
 #define HAS_EXT_COLOR false
 #endif
 #define DEBUG false
+#define NONL true
 
 namespace rwm {
 	enum {

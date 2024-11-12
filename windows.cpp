@@ -782,10 +782,13 @@ namespace rwm {
 		waddstr_enc(win, utf8substr(state.out, 0, maxlen));
 
 		for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
-			scrollok(win, TRUE);
-			scroll(win);
+			if (!NONL) {
+				scrollok(win, TRUE);
+				scroll(win);
+			}
 			wmove(win, y, 0);
-			scrollok(win, FALSE);
+			if (!NONL)
+				scrollok(win, FALSE);
 			waddstr_enc(win, utf8substr(state.out, i, i + getmaxx(win) - 2));
 		}
 		scrollok(win, TRUE);
