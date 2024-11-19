@@ -824,6 +824,8 @@ namespace rwm {
 					return should_refresh; // No data or closed
 			}
 			if (state.is_text) {
+				if (buffer[i] == '@')
+					int a = 0;
 				state.esc_seq = "";
 				if (buffer[i] < 32 && DEBUG)
 					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
@@ -987,7 +989,7 @@ namespace rwm {
 				break;
 				
 				case 'm':
-				if (state.esc_type == '[')
+				if (state.esc_type == '[' && state.esc_seq[1] != '?')
 					set_attrib();
 				else if (DEBUG) {
 					print_debug(state.esc_seq);

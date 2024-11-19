@@ -28,7 +28,7 @@ namespace rwm {
 	std::unordered_map<std::string, std::string> lat_sup_a;
 	std::unordered_map<std::string, std::string> utf8_conv;
 	std::vector<std::string> reverse_video_chars;
-	bool force_convert = true;
+	bool force_convert = false;
 
 	void init_encoding() {
 		acs = {
