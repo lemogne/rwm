@@ -833,8 +833,6 @@ namespace rwm {
 				}
 			}
 			if (state.is_text) {
-				if (buffer[i] == '@')
-					int a = 0;
 				state.esc_seq = "";
 				if (buffer[i] < 32 && DEBUG)
 					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
