@@ -824,8 +824,13 @@ namespace rwm {
 					status |= SHOULD_CLOSE;
 
 				ret = read(master, buffer, sizeof buffer);
-				if (ret <= 0) 
+				if (ret <= 0) {
+					if (state.is_text && state.out != "") {
+						flush();
+						return 1;
+					}
 					return should_refresh; // No data or closed
+				}
 			}
 			if (state.is_text) {
 				if (buffer[i] == '@')
@@ -1052,10 +1057,6 @@ namespace rwm {
 				state.out = "";
 				continue;
 			}
-		}
-		if (state.is_text && state.out != "") {
-			flush();
-			return 1;
 		}
 		return should_refresh;
 	}
