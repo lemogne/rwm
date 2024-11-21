@@ -130,6 +130,7 @@ namespace rwm {
 	};
 
 	void terminate() {
+		debug_log.close();
 		echo();
 		if (has_colors())
 			use_default_colors();
@@ -260,6 +261,8 @@ namespace rwm {
 	inline int main() {
 		init();
 		doupdate();
+		if (DEBUG)
+			debug_log << "==== RESTART ====\n";
 		bool is_window_dragged = false;
 
 		while (true) {

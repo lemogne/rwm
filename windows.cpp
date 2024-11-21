@@ -33,6 +33,7 @@ namespace rwm {
 	int bold_mode = BOLD;
 
 	char buffer[32768];
+	std::ofstream debug_log(getenv("HOME") + std::string("/.rwmlog"), std::ios::app);
 
 	void run_child(std::vector<std::string>& args, int master, int slave) {
 		// Source: https://www.rkoucha.fr/tech_corner/pty_pdip.html
@@ -790,6 +791,8 @@ namespace rwm {
 			if (!NONL)
 				scrollok(win, FALSE);
 			waddstr_enc(win, utf8substr(state.out, i, i + getmaxx(win) - 2));
+			if (DEBUG)
+				debug_log << utf8substr(state.out, i, i + getmaxx(win) - 2) << '\n';
 		}
 		scrollok(win, TRUE);
 
@@ -800,6 +803,7 @@ namespace rwm {
 		static int x = 0;
 		static int y = 0;
 		mvaddstr(y, x, (msg).c_str());
+		debug_log << msg << '\n';
 		y++;
 		if (y >= getmaxy(stdscr)) {
 			x += 15;

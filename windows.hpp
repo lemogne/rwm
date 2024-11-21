@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <fstream>
 #define SEL_WIN ((int) rwm::windows.size() - 1)
 #ifdef NCURSES_EXT_COLORS
 #define HAS_EXT_COLOR true
@@ -15,6 +16,8 @@
 #define NONL true
 
 namespace rwm {
+	extern std::ofstream debug_log;
+
 	enum {
 		FULLSCREEN = 1,         // Run in fullscreen mode
 		FROZEN = 2,             // Freeze output
