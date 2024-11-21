@@ -779,23 +779,30 @@ namespace rwm {
 		scrollok(win, FALSE);
 		int x, y;
 		getyx(win, y, x);
-		int maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
+		int maxlen;
+		if (!NONL)
+			maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
+		else
+			maxlen = getmaxx(win) - x;
 		waddstr_enc(win, utf8substr(state.out, 0, maxlen));
+		if (DEBUG)
+			debug_log << utf8substr(state.out, 0, maxlen) << '\n';
 
-		for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
-			if (!NONL) {
+		if (!NONL) {
+			for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
 				scrollok(win, TRUE);
 				scroll(win);
-			}
-			wmove(win, y, 0);
-			if (!NONL)
+				wmove(win, y, 0);
 				scrollok(win, FALSE);
-			waddstr_enc(win, utf8substr(state.out, i, i + getmaxx(win) - 2));
-			if (DEBUG)
-				debug_log << utf8substr(state.out, i, i + getmaxx(win) - 2) << '\n';
+				waddstr_enc(win, utf8substr(state.out, i, i + getmaxx(win) - 2));
+				if (DEBUG)
+					debug_log << utf8substr(state.out, i, i + getmaxx(win) - 2) << '\n';
+			}
+		} else if (maxlen <= utf8length(state.out)) {
+			wmove(win, y, getmaxx(win) - 1);
 		}
-		scrollok(win, TRUE);
 
+		scrollok(win, TRUE);
 		state.out = "";
 	}
 
