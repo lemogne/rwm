@@ -839,7 +839,7 @@ namespace rwm {
 				if (buffer[i] < 32 && DEBUG)
 					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
-					case '\x1B': case '\x9B' ... '\x9F':
+					case '\x1B':
 					if (state.out != "") {
 						flush();
 						should_refresh = 1;
@@ -847,8 +847,6 @@ namespace rwm {
 					state.is_text = false;
 					state.ctrl.clear();
 					state.esc_type = buffer[i];
-					if (buffer[i] >= '\x9B' && buffer[i] <= '\x9F')
-						state.esc_type += '[' - '\x9B';
 					continue;
 
 					case '\r': {
