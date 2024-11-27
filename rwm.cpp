@@ -236,7 +236,7 @@ namespace rwm {
 		getbegyx(f, y, x);
 		getmaxyx(f, maxy, maxx);
 		return x == pos.x || x + maxx - 1 == pos.x
-		    || y == pos.y || y + maxy - 1== pos.y;
+		    || y == pos.y || y + maxy - 1 == pos.y;
 	}
 
 	void close_window(int i) {
@@ -245,11 +245,14 @@ namespace rwm {
 		if (i == SEL_WIN) 
 			set_selected(-1);
 		
-		windows[i]->destroy();
-		rwm_desktop::close_window(windows[i]);
-		delete windows[i];
-		windows.erase(windows.begin() + i);
-		full_refresh();
+		if (windows[i]->destroy()) {
+			rwm_desktop::close_window(windows[i]);
+			delete windows[i];
+			windows.erase(windows.begin() + i);
+			full_refresh();
+		} else {
+			print_debug("Zombie process!");
+		}
 	}
 
 	void full_refresh() {

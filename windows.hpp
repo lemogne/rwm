@@ -29,6 +29,7 @@ namespace rwm {
 		APP_CURSOR = 128,       // Application cursor keys
 		INSERT = 256,           // Insert mode
 		MAXIMIZED = 512,        // Window is maximized
+		ZOMBIE = 1024,          // Window should be deleted but has not
 	};
 
 	enum BOLD_MODE {
@@ -93,13 +94,14 @@ namespace rwm {
 	public:
 		Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib);  // Creates Window
 		int output();                                                              // Outputs window to main buffer
+		void send(std::string msg);                                                // Send control sequence to process
 		void render(bool is_focused);                                              // Fully renders window, including frame
 		void move(ivec2 pos);                                                      // Moves window to specified coordinates (absolute)
 		void move_by(ivec2 d);                                                     // Moves window by specified vector (relative)
 		void resize(ivec2 size);                                                   // Resizes window to new dimensions
 		void maximize();                                                           // Maximise or unmaximise window based on flags
 		void flush();                                                              // Flushes output in output buffer to window
-		void destroy();                                                            // Destroys window (use before deleting!)
+		int destroy();                                                             // Destroys window (use before deleting!)
 	private:
 	// Parser methods
 		void apply_color(int c, bool bg);     // Applies color c to attributes

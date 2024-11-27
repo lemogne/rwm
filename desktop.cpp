@@ -746,6 +746,7 @@ namespace rwm_desktop {
 			return true;
 
 			case 'Q':
+			P_SEL_WIN->status |= rwm::SHOULD_CLOSE;
 			rwm::close_window(SEL_WIN);
 			alt_pressed = false;
 			should_refresh = true;
@@ -933,6 +934,7 @@ namespace rwm_desktop {
 
 				case -3 ... -2:
 					// Close
+					P_SEL_WIN->status |= rwm::SHOULD_CLOSE;
 					rwm::close_window(i);
 					break;
 				default:

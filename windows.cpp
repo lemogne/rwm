@@ -135,15 +135,21 @@ namespace rwm {
 		}
 	}
 
-	void Window::destroy() {
-		delwin(win);
-		delwin(frame);
-		delwin(alt_win);
-		delwin(alt_frame);
+	int Window::destroy() {
 		close(master);
-		kill(slave, SIGTERM);
+		if (!(status & ZOMBIE))
+			kill(slave, SIGTERM);
 		int exit_status;
-		waitpid(pid, &exit_status, WUNTRACED);
+		pid_t retval = waitpid(pid, &exit_status, WNOHANG);
+		if (!retval)
+			status |= ZOMBIE | SHOULD_CLOSE;
+		else { 
+			delwin(win);
+			delwin(frame);
+			delwin(alt_win);
+			delwin(alt_frame);
+		}
+		return retval;
 	}
 
 	void Window::maximize() {
@@ -839,10 +845,16 @@ namespace rwm {
 		wnoutrefresh(stdscr);
 	}
 
+	void Window::send(std::string message) {
+		
+	}
+
 	int Window::output() {
 		int ret = sizeof buffer;
 		int should_refresh = this->should_refresh;
 		this->should_refresh = false;
+		if (status & ZOMBIE)
+			return 1;
 		for (int i = 0; i < ret; i++) {
 			if (i == 0) {
 				pollfd p{master, POLLHUP, 1};
