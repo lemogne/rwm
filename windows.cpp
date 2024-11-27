@@ -694,7 +694,6 @@ namespace rwm {
 			break;
 
 			default:
-				x = x;
 				break;
 		}
 	}
