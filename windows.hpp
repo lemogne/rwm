@@ -12,7 +12,7 @@
 #else
 #define HAS_EXT_COLOR false
 #endif
-#define DEBUG false
+#define DEBUG true
 #define NONL true
 
 namespace rwm {

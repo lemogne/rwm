@@ -742,14 +742,30 @@ namespace rwm {
 			}
 			break;
 
-			case 'L':
-			flush();
-			winsdelln(win, std::max(n1, 1));
+
+			// hacky solution to respect scrolling regions, which ncurses refuses to do
+			case 'L':{
+				flush();
+				int x, y, top, bot;
+				getyx(win, y, x);
+				wgetscrreg(win, &top, &bot);
+				wsetscrreg(win, y, bot);
+				wscrl(win, -std::max(n1, 1));
+				wmove(win, y, 0);
+				wsetscrreg(win, top, bot);
+			}
 			break;
 
-			case 'M':
-			flush();
-			winsdelln(win, -std::max(n1, 1));
+			case 'M': {
+				flush();
+				int x, y, top, bot;
+				getyx(win, y, x);
+				wgetscrreg(win, &top, &bot);
+				wsetscrreg(win, y, bot);
+				wscrl(win, std::max(n1, 1));
+				wmove(win, y, 0);
+				wsetscrreg(win, top, bot);
+			}
 			break;
 
 			case 'P':
@@ -964,7 +980,7 @@ namespace rwm {
 					wgetscrreg(win, &top, &bot);
 					if (y <= top) {
 						wscrl(win, -1);
-						wmove(win, y, x);
+						wmove(win, y - 1, x);
 					} else {
 						wmove(win, y - 1, x);
 					}
