@@ -639,10 +639,10 @@ namespace rwm {
 			case 'A':
 			wmove(win, y - n1, x);
 			break;
-			case 'B':
+			case 'B': case 'e':
 			wmove(win, y + n1, x);
 			break;
-			case 'C':
+			case 'C': case 'a':
 			wmove(win, y, x + n1);
 			break;
 			case 'D':
@@ -654,7 +654,7 @@ namespace rwm {
 			case 'F':
 			wmove(win, y - n1, 0);
 			break;
-			case 'G':
+			case 'G': case '`':
 			wmove(win, y, n1 - 1);
 			break;
 			case 'H': case 'f':
@@ -686,6 +686,10 @@ namespace rwm {
 					print_debug(response);
 			}
 			break;
+
+			default:
+				x = x;
+				break;
 		}
 	}
 
@@ -938,8 +942,8 @@ namespace rwm {
 					continue;
 				}
 				switch (buffer[i]) {
-				case 'A' ... 'H': case 'S' ... 'T': case 'f':
-				case 's': case 'u': case 'n': case 'd':
+				case 'A' ... 'H': case 'S' ... 'T': case 'd' ... 'f':
+				case 's': case 'u': case 'n': case 'W': case 'Z': case '`' ... 'a':
 				if (state.esc_type == '[')
 					move_cursor(buffer[i]);
 				else if (state.esc_type == '(' && buffer[i] == 'B')
@@ -1033,6 +1037,8 @@ namespace rwm {
 				case '[' ... '_': case '>': case '$': case ' ':
 				if (state.ctrl.size() < 1 && state.esc_type == '\x1B')
 					state.esc_type = buffer[i];
+				else if (state.esc_type == '[' && buffer[i] == '^')
+					move_cursor(buffer[i]);
 				else
 					state.out += buffer[i];
 				continue;
@@ -1042,6 +1048,12 @@ namespace rwm {
 					state.vt220 = true;
 					break;
 				} else if (state.esc_type == '\x1B') {
+					if (DEBUG) {
+						print_debug(state.esc_seq);
+						should_refresh = 1;
+					}
+					break;
+				} else if (state.esc_type != '[' && state.esc_type != ']') {
 					if (DEBUG) {
 						print_debug(state.esc_seq);
 						should_refresh = 1;
