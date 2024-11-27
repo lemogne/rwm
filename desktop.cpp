@@ -609,18 +609,21 @@ namespace rwm_desktop {
 		mvaddstr(getmaxy(stdscr) - 1, 5, prompt_string.c_str());
 		echo();
 		move(getmaxy(stdscr) - 1, 7);
+		curs_set(1);
 		while(true) {
 			int c = getch();
 			switch(c) {
 				case '\n': case '\r': {
 					int offset = rwm::windows.size();
 					open_program(input, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
+					curs_set(0);
 					return;
 				}
 
 				case 27:
 				draw_taskbar();
 				noecho();
+				curs_set(0);
 				return;
 
 				case '\b': case KEY_BACKSPACE:
