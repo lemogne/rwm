@@ -13,7 +13,6 @@
 #define HAS_EXT_COLOR false
 #endif
 #define DEBUG false
-#define NONL true
 
 namespace rwm {
 	extern std::ofstream debug_log;
@@ -69,6 +68,7 @@ namespace rwm {
 		ivec2 saved_cursor_pos = {0, 0};   // Saved cursor position
 		int cursor = 1;                    // Current cursor state
 		std::string esc_seq = "";
+		bool auto_nl = false;
 	};
 
 	struct Window {

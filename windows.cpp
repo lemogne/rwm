@@ -805,7 +805,7 @@ namespace rwm {
 		int x, y;
 		getyx(win, y, x);
 		int maxlen;
-		if (!NONL)
+		if (state.auto_nl)
 			maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
 		else
 			maxlen = getmaxx(win) - x;
@@ -813,7 +813,7 @@ namespace rwm {
 		if (DEBUG)
 			debug_log << utf8substr(state.out, 0, maxlen) << '\n';
 
-		if (!NONL) {
+		if (state.auto_nl) {
 			for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
 				scrollok(win, TRUE);
 				scroll(win);
@@ -1015,7 +1015,9 @@ namespace rwm {
 					if (state.esc_type == '[' && state.out == "?")
 						do_private_seq(buffer[i]);
 					else if (state.esc_type == '[' && n1 == 4)
-						status = (buffer[i] == 'h') ? (status | INSERT) : (buffer[i] == 'l') ? (status & ~INSERT) : status;
+						status = (buffer[i] == 'h') ? (status | INSERT) : (status & ~INSERT);
+					else if (state.esc_type == '[' && n1 == 20)
+						state.auto_nl = (buffer[i] == 'h');
 					else if (DEBUG) {
 						print_debug(state.esc_seq);
 						should_refresh = 1;
