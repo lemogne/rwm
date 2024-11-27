@@ -95,6 +95,7 @@ namespace rwm {
 		Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib);  // Creates Window
 		int output();                                                              // Outputs window to main buffer
 		void send(std::string msg);                                                // Send control sequence to process
+		void send(char c);                                                         // Send character to process
 		void render(bool is_focused);                                              // Fully renders window, including frame
 		void move(ivec2 pos);                                                      // Moves window to specified coordinates (absolute)
 		void move_by(ivec2 d);                                                     // Moves window by specified vector (relative)

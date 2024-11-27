@@ -194,7 +194,7 @@ namespace rwm {
 	void move_to_top(int i) {
 		std::string status = "\033[O";
 		if (windows[SEL_WIN]->status & REPORT_FOCUS)
-			write(windows[SEL_WIN]->master, status.c_str(), status.size());
+			windows[SEL_WIN]->send(status);
 
 		Window* sel = windows[i];
 		windows.erase(windows.begin() + i);
@@ -202,7 +202,7 @@ namespace rwm {
 
 		status = "\033[I";
 		if (windows[SEL_WIN]->status & REPORT_FOCUS)
-			write(windows[SEL_WIN]->master, status.c_str(), status.size());
+			windows[SEL_WIN]->send(status);
 		windows[SEL_WIN]->should_refresh = true;
 	}
 
@@ -324,12 +324,12 @@ namespace rwm {
 								case 1000: {
 									int x, y;
 									getbegyx(windows[SEL_WIN]->win, y, x);
-									char mouse_msg[6] = {'\033', '[', 'M', mouse_conversion.at(event.bstate & MOUSE_MASK), 
+									std::string mouse_msg = {'\033', '[', 'M', mouse_conversion.at(event.bstate & MOUSE_MASK), 
 										(char) (event.x - x + 33), (char) (event.y - y + 33)
 									};
 									if (DEBUG)
 										print_debug(mouse_msg);
-									write(windows[SEL_WIN]->master, mouse_msg, 6);
+									windows[SEL_WIN]->send(mouse_msg);
 								}
 								break;
 
@@ -357,7 +357,7 @@ namespace rwm {
 				c = '\b';
 				if (selected_window) {
 					wdelch(windows[SEL_WIN]->win);
-					write(windows[SEL_WIN]->master, &c, 1);
+					windows[SEL_WIN]->send(c);
 				} else
 					rwm_desktop::key_pressed(c);
 				break;
@@ -365,9 +365,9 @@ namespace rwm {
 			default:
 				if (selected_window) {
 					if ((windows[SEL_WIN]->status & APP_CURSOR) && app_key_conversion.find(c) != app_key_conversion.end()) {
-						write(windows[SEL_WIN]->master, app_key_conversion.at(c).c_str(), app_key_conversion.at(c).size());
+						windows[SEL_WIN]->send(app_key_conversion.at(c));
 					} else if (key_conversion.find(c) != key_conversion.end()) {
-						write(windows[SEL_WIN]->master, key_conversion.at(c).c_str(), key_conversion.at(c).size());
+						windows[SEL_WIN]->send(key_conversion.at(c));
 					} else if (c > 276 && c < 313) {
 						int cc = (c - 265) % 12 + 265;
 						int mod = (c - 265) / 12;
@@ -376,7 +376,7 @@ namespace rwm {
 						int alt = (mod & 4) >> 1;
 						std::string code = key_conversion.at(cc).substr(0, 4) + ';' + std::to_string(shift + ctrl + alt) + '~';
 					} else if (c < 256) {
-						write(windows[SEL_WIN]->master, &c, 1);
+						windows[SEL_WIN]->send(c);
 					}
 				} else
 					rwm_desktop::key_pressed(c);
@@ -385,7 +385,7 @@ namespace rwm {
 			case '\x03':
 				// ^C
 				if (selected_window)  {
-					write(windows[SEL_WIN]->master, &c, 1);
+					windows[SEL_WIN]->send(c);
 					windows[SEL_WIN]->status &= ~NO_EXIT;
 				} else
 					rwm_desktop::key_pressed(c);

@@ -687,7 +687,7 @@ namespace rwm {
 			case 'n':
 			if (n1 == 6) {
 				std::string response = "\033[" + std::to_string(y + 1) + ';' + std::to_string(x + 1) + 'R';
-				write(master, response.c_str(), response.size());
+				send(response);
 				if (DEBUG)
 					print_debug(response);
 			}
@@ -846,7 +846,13 @@ namespace rwm {
 	}
 
 	void Window::send(std::string message) {
-		
+		if (!(status & ZOMBIE))
+			write(master, message.c_str(), message.size());
+	}
+
+	void Window::send(char c) {
+		if (!(status & ZOMBIE))
+			write(master, &c, 1);
 	}
 
 	int Window::output() {
