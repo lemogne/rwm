@@ -97,7 +97,7 @@ namespace rwm {
 
 		winsize wsize;
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
-			printf("TIOCGWINSZ error");
+			print_debug("TIOCGWINSZ error");
 		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
 		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
 		wsize.ws_row = size_win.y;
@@ -189,7 +189,7 @@ namespace rwm {
 		winsize wsize;
 		rwm::ivec2 size_win = {getmaxy(win), getmaxx(win)};
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
-			printf("TIOCGWINSZ error");
+			print_debug("TIOCGWINSZ error");
 		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
 		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
 		wsize.ws_row = size_win.y;
@@ -211,7 +211,7 @@ namespace rwm {
 		winsize wsize;
 		rwm::ivec2 size_win = {getmaxy(win), getmaxx(win)};
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
-			printf("TIOCGWINSZ error");
+			print_debug("TIOCGWINSZ error");
 		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
 		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
 		wsize.ws_row = size_win.y;
