@@ -92,7 +92,9 @@ namespace rwm {
 
 	// API
 	public:
-		Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib);  // Creates Window
+		Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib);  // Creates window
+		Window(WINDOW* win, std::string title, int attrib, int master, int slave); // Creates internal window
+		static Window* create_debug();                                             // Creates debug window
 		int output();                                                              // Outputs window to main buffer
 		void send(std::string msg);                                                // Send control sequence to process
 		void send(char c);                                                         // Send character to process

@@ -29,7 +29,7 @@ namespace rwm {
 	std::unordered_map<uint64_t, chtype> pair_map = {};
 
 	std::vector<Window*> windows = {};
-	bool selected_window = true;
+	bool selected_window = false;
 	int bold_mode = BOLD;
 
 	char buffer[32768];
@@ -122,6 +122,82 @@ namespace rwm {
 		close(slave);
 		status = attrib;
 		render(false);
+	}
+
+	Window::Window(WINDOW* frame, std::string title, int attrib, int master, int slave) {
+		getmaxyx(frame, size.y, size.x);
+		getbegyx(frame, pos.y, pos.x);
+		this->frame = frame;
+		ivec2 size_win = {size.y - 2, size.x - 2};
+		win = derwin(frame, size_win.y, size_win.x, 1, 1);
+		scrollok(win, TRUE);
+		wtimeout(win, 0);
+		idlok(win, TRUE);
+		keypad(win, TRUE);
+
+		alt_frame = newwin(size.y, size.x, pos.y, pos.x);
+		alt_win = derwin(alt_frame, size_win.y, size_win.x, 1, 1);
+		scrollok(alt_win, TRUE);
+		wtimeout(alt_win, 0);
+		idlok(alt_win, TRUE);
+		keypad(alt_win, TRUE);
+
+		this->title = title;
+
+		this->master = master;
+		this->slave = slave;
+
+		status = attrib;
+		int x, y;
+		getbegyx(this->frame, y, x);
+		getmaxyx(this->frame, y, x);
+		render(false);
+	}
+
+	Window* Window::create_debug() {
+		// init debug window
+		WINDOW* w = newwin(33, 95, 10, 10);
+		if (!w) {
+			printf("Could not create debug window!\n");
+			exit(1);
+		}
+		int x, y;
+		getbegyx(w, y, x);
+		getmaxyx(w, y, x);
+	
+		int master, slave;
+		ivec2 size_win = {31, 93};
+
+		winsize wsize;
+		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
+			printf("TIOCGWINSZ error");
+		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
+		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
+		wsize.ws_row = size_win.y;
+		wsize.ws_col = size_win.x;
+
+		if (openpty(&master, &slave, nullptr, nullptr, &wsize)) {
+			// For now
+			exit(1);
+		}
+
+		int flags = fcntl(master, F_GETFL, 0);
+		fcntl(master, F_SETFL, flags | O_NONBLOCK);
+
+		termios term_settings{};
+		tcgetattr(slave, &term_settings);
+		cfmakeraw(&term_settings);
+		tcsetattr(slave, TCSANOW | ECHO | ISIG, &term_settings);
+
+		close(2);
+		int a = dup(slave);
+		close(slave);
+		slave = 2;
+
+		setsid();
+		ioctl(2, TIOCSCTTY, 1);
+		
+		return new Window(w, "DEBUG WINDOW", 0, master, slave);
 	}
 
 	void Window::render(bool is_focused) {
@@ -833,15 +909,18 @@ namespace rwm {
 
 	void print_debug(std::string msg) {
 		static int x = 0;
-		static int y = 0;
-		mvaddstr(y, x, (msg).c_str());
-		debug_log << msg << '\n';
+		static int y = -1;
 		y++;
-		if (y >= getmaxy(stdscr)) {
+		if (y >= 30) {
 			x += 15;
 			y = 0;
 		}
-		wnoutrefresh(stdscr);
+		if (x >= 85) {
+			x = 0;
+			fprintf(stderr, "\033[2J");
+		}
+		fprintf(stderr, "\033[%d;%dH%s\n", y+1, x+1, msg.c_str());
+		debug_log << msg << '\n';
 	}
 
 	void Window::send(std::string message) {
@@ -878,7 +957,7 @@ namespace rwm {
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
-				if (buffer[i] < 32 && DEBUG)
+				if (buffer[i] < 32 && DEBUG && slave != 2)
 					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
 					case '\x1B':
@@ -1102,7 +1181,7 @@ namespace rwm {
 				continue;
 				}
 				state.is_text = true;
-				if (DEBUG)
+				if (DEBUG && slave != 2)
 					print_debug(state.esc_seq);
 				state.out = "";
 				continue;

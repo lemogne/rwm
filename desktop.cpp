@@ -555,6 +555,10 @@ namespace rwm_desktop {
 		draw_icons();
 		//draw_taskbar();
 		chdir(desktop_path.c_str());
+		if (DEBUG) {
+			new_win(rwm::Window::create_debug());
+			should_refresh = true;
+		}
 		return;
 	}
 
