@@ -753,6 +753,8 @@ namespace rwm_desktop {
 			return true;
 
 			case 'Q':
+			if (SEL_WIN < 0)
+				return true;
 			P_SEL_WIN->status |= rwm::SHOULD_CLOSE;
 			rwm::close_window(SEL_WIN);
 			alt_pressed = false;
