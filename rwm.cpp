@@ -250,7 +250,7 @@ namespace rwm {
 			delete windows[i];
 			windows.erase(windows.begin() + i);
 			full_refresh();
-		} else {
+		} else if (DEBUG) {
 			print_debug("Zombie process!");
 		}
 	}
