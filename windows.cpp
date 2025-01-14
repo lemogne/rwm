@@ -75,26 +75,8 @@ namespace rwm {
 		exit(0);
 	}
 
-	Window::Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib) {
-		this->size = size;
-		this->pos = pos;
+	void Window::launch_program(std::vector<std::string> args) {
 		ivec2 size_win = {size.y - 2, size.x - 2};
-		frame = newwin(size.y, size.x, pos.y, pos.x);
-		win = derwin(frame, size_win.y, size_win.x, 1, 1);
-		scrollok(win, TRUE);
-		wtimeout(win, 0);
-		idlok(win, TRUE);
-		keypad(win, TRUE);
-
-		alt_frame = newwin(size.y, size.x, pos.y, pos.x);
-		alt_win = derwin(alt_frame, size_win.y, size_win.x, 1, 1);
-		scrollok(alt_win, TRUE);
-		wtimeout(alt_win, 0);
-		idlok(alt_win, TRUE);
-		keypad(alt_win, TRUE);
-
-		title = args[0];
-
 		winsize wsize;
 		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
 			print_debug("TIOCGWINSZ error");
@@ -120,8 +102,31 @@ namespace rwm {
 			run_child(args, master, slave);
 		}
 		close(slave);
-		status = attrib;
 		render(false);
+	}
+
+	Window::Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib) {
+		this->size = size;
+		this->pos = pos;
+		ivec2 size_win = {size.y - 2, size.x - 2};
+		frame = newwin(size.y, size.x, pos.y, pos.x);
+		win = derwin(frame, size_win.y, size_win.x, 1, 1);
+		scrollok(win, TRUE);
+		wtimeout(win, 0);
+		idlok(win, TRUE);
+		keypad(win, TRUE);
+
+		alt_frame = newwin(size.y, size.x, pos.y, pos.x);
+		alt_win = derwin(alt_frame, size_win.y, size_win.x, 1, 1);
+		scrollok(alt_win, TRUE);
+		wtimeout(alt_win, 0);
+		idlok(alt_win, TRUE);
+		keypad(alt_win, TRUE);
+
+		title = args[0];
+		status = attrib;
+
+		launch_program(args);
 	}
 
 	Window::Window(WINDOW* frame, std::string title, int attrib, int master, int slave) {
@@ -212,9 +217,8 @@ namespace rwm {
 	}
 
 	int Window::destroy() {
-		close(master);
 		if (!(status & ZOMBIE))
-			kill(slave, SIGTERM);
+			kill(pid, SIGHUP);
 		int exit_status;
 		pid_t retval = waitpid(pid, &exit_status, WNOHANG);
 		if (!retval)
@@ -224,6 +228,7 @@ namespace rwm {
 			delwin(frame);
 			delwin(alt_win);
 			delwin(alt_frame);
+			close(master);
 		}
 		return retval;
 	}

@@ -12,7 +12,7 @@
 #else
 #define HAS_EXT_COLOR false
 #endif
-#define DEBUG false
+#define DEBUG true
 
 namespace rwm {
 	extern std::ofstream debug_log;
@@ -95,6 +95,7 @@ namespace rwm {
 		Window(std::vector<std::string> args, ivec2 pos, ivec2 size, int attrib);  // Creates window
 		Window(WINDOW* win, std::string title, int attrib, int master, int slave); // Creates internal window
 		static Window* create_debug();                                             // Creates debug window
+		void launch_program(std::vector<std::string> args);                        // Launches program with args in window
 		int output();                                                              // Outputs window to main buffer
 		void send(std::string msg);                                                // Send control sequence to process
 		void send(char c);                                                         // Send character to process
