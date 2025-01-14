@@ -41,6 +41,7 @@ namespace rwm_desktop {
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::vector<std::string> background_program = {};
 	rwm::Window* background;
+	bool should_draw_icons = true;
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
@@ -504,6 +505,8 @@ namespace rwm_desktop {
 	}
 
 	void draw_icons() {
+		if (!should_draw_icons)
+			return;
 		int y = 1;
 		int x = (spacing.x - 3) / 2;
 		int title_lines = 3;
@@ -568,7 +571,7 @@ namespace rwm_desktop {
 		}
 
 		init_widgets();
-		//draw_icons();
+		draw_icons();
 		//draw_taskbar();
 		chdir(desktop_path.c_str());
 		if (DEBUG) {
@@ -582,6 +585,7 @@ namespace rwm_desktop {
 		curs_set(0);
 		touchwin(stdscr);
 		draw_background();
+		draw_icons();
 		draw_taskbar();
 		root_cell.apply_tiled_mode();
 		wnoutrefresh(stdscr);
