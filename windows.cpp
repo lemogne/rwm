@@ -779,6 +779,13 @@ namespace rwm {
 		}
 	}
 
+	void Window::flatten_buffers() {
+		delwin(alt_win);
+		delwin(alt_frame);
+		alt_win = win;
+		alt_frame = frame;
+	}
+
 	void Window::move_by(ivec2 d) {
 		move({getbegy(frame) + d.y, getbegx(frame) + d.x});
 	}

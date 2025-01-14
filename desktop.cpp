@@ -39,6 +39,8 @@ namespace rwm_desktop {
 	int tiled_mode = 0;
 	bool vertical_mode = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
+	std::vector<std::string> background_program = {};
+	rwm::Window* background;
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
@@ -495,6 +497,12 @@ namespace rwm_desktop {
 		}
 	}
 
+	void draw_background() {
+		if (!background)
+			return;
+		background->render(false);
+	}
+
 	void draw_icons() {
 		int y = 1;
 		int x = (spacing.x - 3) / 2;
@@ -551,8 +559,16 @@ namespace rwm_desktop {
 
 	void init() {
 		//draw_background("./12_DEC23.ANS", {15, 50}, {1, 1});
+		if (!background_program.empty()) {
+			rwm::ivec2 bgsize = {};
+			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
+			background->flatten_buffers();
+			background->launch_program(background_program);
+			draw_background();
+		}
+
 		init_widgets();
-		draw_icons();
+		//draw_icons();
 		//draw_taskbar();
 		chdir(desktop_path.c_str());
 		if (DEBUG) {
@@ -565,6 +581,7 @@ namespace rwm_desktop {
 	void render() {
 		curs_set(0);
 		touchwin(stdscr);
+		draw_background();
 		draw_taskbar();
 		root_cell.apply_tiled_mode();
 		wnoutrefresh(stdscr);
@@ -910,6 +927,11 @@ namespace rwm_desktop {
 		// Refresh every minute
 		auto now = std::chrono::system_clock::now().time_since_epoch();
     	long long time = std::chrono::duration_cast<std::chrono::seconds>(now).count();
+		if (background) {
+			int ret = background->output();
+			if (ret == 1) 
+				should_refresh = true;
+		} 
 		if (time % 60 == 0 && !have_updated)
 			should_refresh = true;
 		have_updated = (time % 60) == 0;

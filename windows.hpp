@@ -12,7 +12,7 @@
 #else
 #define HAS_EXT_COLOR false
 #endif
-#define DEBUG true
+#define DEBUG false
 
 namespace rwm {
 	extern std::ofstream debug_log;
@@ -105,6 +105,7 @@ namespace rwm {
 		void resize(ivec2 size);                                                   // Resizes window to new dimensions
 		void maximize();                                                           // Maximise or unmaximise window based on flags
 		void flush();                                                              // Flushes output in output buffer to window
+		void flatten_buffers();                                                    // Flattens output buffers into one
 		int destroy();                                                             // Destroys window (use before deleting!)
 	private:
 	// Parser methods
