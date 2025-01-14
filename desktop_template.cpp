@@ -30,7 +30,7 @@ namespace rwm_desktop {
 		return false;
 	}
 
-	bool frame_click(rwm::Window& win, rwm::ivec2 pos, int bstate) {
+	bool frame_click(int i, rwm::ivec2 pos, int bstate) {
 		// Add window frame interaction handling code here
 		return false;
 	}
@@ -39,7 +39,7 @@ namespace rwm_desktop {
 		// Add window frame renderer here
 	}
 
-	void close_window(int i) {
+	void close_window(rwm::Window* win) {
 		
 	}
 }
