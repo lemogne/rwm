@@ -573,7 +573,7 @@ namespace rwm_desktop {
 		init_widgets();
 		draw_icons();
 		//draw_taskbar();
-		chdir(desktop_path.c_str());
+		chdir(getenv("HOME"));
 		if (DEBUG) {
 			new_win(rwm::Window::create_debug());
 			should_refresh = true;
