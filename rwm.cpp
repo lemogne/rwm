@@ -391,7 +391,7 @@ namespace rwm {
 					rwm_desktop::key_pressed(c);
 				break;
 			}
-			sleep(0.02);
+			//usleep(20000);
 		}
 		terminate();
 	}
