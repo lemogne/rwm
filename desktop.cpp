@@ -471,33 +471,6 @@ namespace rwm_desktop {
 		attroff(A_REVERSE);
 	}
 
-	// void draw_background(std::string filename, rwm::ivec2 pos, rwm::ivec2 size) {
-	// 	// Temporary solution; will write proper parser later
-	// 	std::ifstream file;
-	// 	std::string contents;
-	// 	std::string out;
-	// 	file.open(filename);
-	// 	int y = pos.y;
-	// 	move(y, pos.x);
-	// 	wnoutrefresh(stdscr);
-	// 	while (getline(file, contents)) {
-	// 		for (unsigned char c : contents) {
-	// 			if (c == '\033')
-	// 				out += '\033';
-	// 			else if (c == 13) {
-	// 				out += "\r\n" + std::string(pos.x, ' ');
-	// 				for (int i = 0; i < size.y; i++) {
-	// 					printf(out.c_str());
-	// 					fflush(stdout);
-	// 					y++;
-	// 				}
-	// 				out = "";
-	// 			} else
-	// 				out += rwm::codepage_437[c];
-	// 		}
-	// 	}
-	// }
-
 	void draw_background() {
 		if (!background)
 			return;
