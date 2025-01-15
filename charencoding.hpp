@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <ncurses.h>
 
 namespace rwm {
 	extern std::vector<std::string> codepage_437;
