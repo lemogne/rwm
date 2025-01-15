@@ -45,10 +45,13 @@ void draw_image(std::string filename, ivec2 pos, ivec2 size) {
 				std::cout << out << "\033[" << pos.x << 'C';
 				y++;
 				out = "";
-			} else
+			} else if (c == 0x1a || c == 0x04)
+					goto eof;
+			else
 				out += codepage_437[c];
 		}
 	}
+eof:
 	std::cout << out << "\r\n";
 	file.close();
 }
@@ -82,7 +85,7 @@ void scroll_image(std::string filename, ivec2 pos, ivec2 size, int lines_per_pag
 					out += codepage_437[c];
 			}
 		}
-		eof:
+	eof:
 		file.clear();
 		file.seekg(0);
 		std::cout << out << "\r\n";
