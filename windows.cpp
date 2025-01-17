@@ -896,7 +896,7 @@ namespace rwm {
 		if (state.auto_nl)
 			maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
 		else
-			maxlen = getmaxx(win) - x;
+			maxlen = getmaxx(win) - x + 1;
 		waddstr_enc(win, utf8substr(state.out, 0, maxlen));
 		if (DEBUG)
 			debug_log << utf8substr(state.out, 0, maxlen) << '\n';
