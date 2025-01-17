@@ -137,8 +137,9 @@ namespace rwm {
 	}
 
 	void init() {
-		init_encoding();
+		setlocale(LC_CTYPE, "");
 		initscr();
+		init_encoding();
 		cbreak();
 		noecho();
 		intrflush(stdscr, FALSE);

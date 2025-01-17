@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <iconv.h>
 #include <langinfo.h>
-#include <locale.h>
 #include <unistd.h>
 #include <unordered_set>
 #include <poll.h>
@@ -68,7 +67,6 @@ namespace rwm {
 	}
 
 	void init_encoding() {
-		setlocale(LC_CTYPE, "");
 		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
 		is_tty = NULL == getenv("DISPLAY");
 		tty_get_avail_chars();
