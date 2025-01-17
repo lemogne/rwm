@@ -3,6 +3,16 @@
 #include <ncurses.h>
 #include <unordered_map>
 #include <iconv.h>
+#include <langinfo.h>
+#include <locale.h>
+#include <unistd.h>
+#include <unordered_set>
+#include <poll.h>
+#include <fstream>
+#include <codecvt>
+#include <locale>
+
+
 
 namespace rwm {
 	std::vector<std::string> codepage_437 = {
@@ -27,10 +37,43 @@ namespace rwm {
 	std::unordered_map<std::string, cchar_t*> acs;
 	std::unordered_map<std::string, std::string> lat_sup_a;
 	std::unordered_map<std::string, std::string> utf8_conv;
+	std::unordered_set<std::string> available_chars;
 	std::vector<std::string> reverse_video_chars;
 	bool force_convert = false;
+	bool utf8 = true;
+	bool no_lat_sup_a = false;
+	bool is_tty = false;
+
+	// Source: StackOverflow (https://stackoverflow.com/questions/56341221/how-to-convert-a-codepoint-to-utf-8)
+	std::string codepoint_to_utf8(char32_t codepoint) {
+		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+		return convert.to_bytes(&codepoint, &codepoint + 1);
+	}
+	void tty_get_avail_chars() {
+		if (!is_tty)
+			return;
+
+		//std::vector<char*> setfont_args = {"setfont", "-ou", "/tmp/umap", nullptr};
+		//execvp("setfont", setfont_args.data());
+		system("setfont -ou /tmp/umap");
+
+		std::ifstream umap("/tmp/umap", std::ios::in);
+		std::string line;
+		while(std::getline(umap, line)) {
+			size_t pos = line.find('\t');
+			const char* charcp = line.substr(pos + 3).c_str();
+			wchar_t cp = std::strtoul(charcp, nullptr, 16);
+			available_chars.emplace(codepoint_to_utf8(cp));
+		}
+	}
 
 	void init_encoding() {
+		setlocale(LC_CTYPE, "");
+		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
+		is_tty = NULL == getenv("DISPLAY");
+		tty_get_avail_chars();
+		//utf8 = false;
+
 		acs = {
 			{"─", WACS_HLINE}, {"═", WACS_D_HLINE}, {"━", WACS_T_HLINE},
 			{"│", WACS_VLINE}, {"║", WACS_D_VLINE}, {"┃", WACS_T_VLINE},
@@ -223,11 +266,8 @@ namespace rwm {
 		};
 	}
 
-	bool utf8 = true;
-	bool no_lat_sup_a = false;
-
 	void waddstr_enc(WINDOW* win, std::string string) {
-		if (utf8 && !force_convert) 
+		if (utf8 && !force_convert && !is_tty) 
 			waddstr(win, string.c_str());
 		else {
 			std::string out = "";
@@ -253,7 +293,11 @@ namespace rwm {
 					auto it = acs.find(utfchar);
 					auto itlsa = lat_sup_a.find(utfchar);
 					auto itutf8 = utf8_conv.find(utfchar);
-					if (it != acs.end()) {
+					auto itavail = available_chars.find(utfchar);
+					if (itavail != available_chars.end()) {
+						waddstr(win, utfchar.c_str());
+						utfchar = "";
+					} else if (it != acs.end()) {
 						cchar_t* ch = it->second;
 						wadd_wch(win, ch);
 						utfchar = "";
