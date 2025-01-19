@@ -95,7 +95,6 @@ namespace rwm_desktop {
 				}
 				return *this;
 			}
-			//iterator operator ++(int) { iterator copy(*this); ++i_; return copy; }
 
 			bool operator ==(const iterator &other) const {return **this == *other;}
 			bool operator !=(const iterator &other) const {return **this != *other;}
@@ -534,7 +533,6 @@ namespace rwm_desktop {
 	}
 
 	void init() {
-		//draw_background("./12_DEC23.ANS", {15, 50}, {1, 1});
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -545,7 +543,6 @@ namespace rwm_desktop {
 
 		init_widgets();
 		draw_icons();
-		//draw_taskbar();
 		chdir(getenv("HOME"));
 		if (DEBUG) {
 			new_win(rwm::Window::create_debug());
