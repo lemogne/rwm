@@ -924,7 +924,7 @@ namespace rwm_desktop {
 				should_refresh = true;
 				switch (fpos.x - f_maxx + 1) {
 				case -8 ... -7:
-					// Minimize (TODO)
+					// Minimize
 					win.status |= rwm::HIDDEN;
 					if (i == SEL_WIN) {
 						rwm::selected_window = false;
@@ -932,7 +932,7 @@ namespace rwm_desktop {
 					}
 					break;
 				case -6 ... -4: 
-					// Maximize (TODO)
+					// Maximize
 					win.status ^= rwm::MAXIMIZED;
 					win.maximize();
 				break;

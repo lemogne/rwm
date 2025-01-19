@@ -686,7 +686,6 @@ namespace rwm {
 			status = (status | ((mode == 'h') ? REPORT_FOCUS : 0)) & ~((mode == 'l') ? REPORT_FOCUS : 0);
 			break;
 
-			// TODO:
 			case 1048: 
 			if (mode == 'h') {
 				int x, y;

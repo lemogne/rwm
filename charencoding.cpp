@@ -52,8 +52,6 @@ namespace rwm {
 		if (!is_tty)
 			return;
 
-		//std::vector<char*> setfont_args = {"setfont", "-ou", "/tmp/umap", nullptr};
-		//execvp("setfont", setfont_args.data());
 		system("setfont -ou /tmp/umap");
 
 		std::ifstream umap("/tmp/umap", std::ios::in);
