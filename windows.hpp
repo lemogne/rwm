@@ -117,6 +117,7 @@ namespace rwm {
 		void do_private_seq(char mode);       // Handle private sequences
 		void move_cursor(char mode);          // Move cursor based on input char (for external API, use ncurses wmove(win, y, x))
 		void erase(char mode);                // Erase part of screen based on input char
+		void manipulate_window();             // Manipulate window
 	};
 	
 	extern std::vector<Window*> windows;      // Currently open windows

@@ -15,6 +15,7 @@
 #include "windows.hpp"
 #include "desktop.hpp"
 #include "charencoding.hpp"
+#include "rwm.h"
 #include <cmath>
 
 namespace rwm {
@@ -809,6 +810,87 @@ namespace rwm {
 		mvwin(alt_win, pos.y + offset.y, pos.x + offset.x);
 	}
 
+	void Window::manipulate_window() {
+		switch(state.ctrl[0]) {
+		case 1:
+			status &= ~rwm::HIDDEN;
+			break;
+
+		case 2:
+			status |= rwm::HIDDEN;
+			if (SEL_WIN >= 0 && this == rwm::windows[SEL_WIN]) {
+				rwm::selected_window = false;
+				curs_set(0);
+			}
+			full_refresh();
+			break;
+		
+		case 3:
+			if (state.ctrl.size() >= 3) {
+				move({state.ctrl[1], state.ctrl[2]});
+				full_refresh();
+			}
+			break;
+
+		case 5: {
+			int i = -1;
+			for (int j = 0; j < windows.size(); j++) {
+				if (windows[j] == this) {
+					i = j;
+					break;
+				}
+			}
+			if (i >= 0) {
+				move_to_top(i);
+			}
+			break;
+		}
+		case 8:
+			if (state.ctrl.size() >= 3) {
+				resize({state.ctrl[1] + 2, state.ctrl[2] + 2});
+				full_refresh();
+			}
+			break;
+
+		case 9:
+			if (state.ctrl.size() >= 2 && state.ctrl[1] == 1)
+				status |= rwm::MAXIMIZED;
+			else
+				status &= ~rwm::MAXIMIZED;
+			maximize();
+			break;
+
+		case 11:
+			if (status & rwm::HIDDEN)
+				send("\033[2t");
+			else
+				send("\033[1t");
+			break;
+
+		case 13: 
+			send("\033[3;" + std::to_string(pos.x) + ';' + std::to_string(pos.y) + 't');
+			break;
+
+		case 18: 
+			send("\033[8;" + std::to_string(getmaxy(win)) + ';' + std::to_string(getmaxx(win)) + 't');
+			break;
+
+		case 19: 
+			send("\033[9;" + std::to_string(getmaxy(stdscr)) + ';' + std::to_string(getmaxx(stdscr)) + 't');
+			break;
+
+		case 21: 
+			send("\033]l" + title + '\7');
+			break;
+			
+		default:
+			if (DEBUG)
+				print_debug(state.esc_seq);
+			return;
+		}
+		should_refresh = true;
+	}
+
 	void Window::erase(char mode) {
 		int n1 = (state.ctrl.size() > 0) ? state.ctrl[0] : 0;
 		switch (mode) {
@@ -1120,6 +1202,15 @@ namespace rwm {
 						should_refresh = 1;
 					}
 				}
+				break;
+
+				case 't':
+					if (state.esc_type == '[') {
+						manipulate_window();
+					} else if (DEBUG) {
+						print_debug(state.esc_seq);
+						should_refresh = 1;
+					}
 				break;
 
 				case 'r':
