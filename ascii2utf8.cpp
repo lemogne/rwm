@@ -28,7 +28,6 @@ struct ivec2 {
 };
 
 void draw_image(std::string filename, ivec2 pos, ivec2 size) {
-	// Temporary solution; will write proper parser later
 	std::ifstream file;
 	std::string contents;
 	std::string out;
@@ -57,7 +56,6 @@ eof:
 }
 
 void scroll_image(std::string filename, ivec2 pos, ivec2 size, int lines_per_page, int speed) {
-	// Temporary solution; will write proper parser later
 	std::ifstream file;
 	std::string contents;
 	std::string out;
