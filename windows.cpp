@@ -752,6 +752,20 @@ namespace rwm {
 			case 'H': case 'f':
 			wmove(win, n1 - 1, n2 - 1);
 			break;
+			case 'I': case 'Z': {
+				for (int i = 0; i < state.tabstop.size(); i++) {
+					if (state.tabstop[i] > x || i == state.tabstop.size() - 1) {
+						int p;
+						if (mode == 'I')
+							p = std::min((int)state.tabstop.size() - 1, i + n1);
+						else
+							p = std::max(0, i - n1);
+						wmove(win, y, state.tabstop[p]);
+						break;
+					}
+				}
+			}
+			break;
 			case 'd':
 			wmove(win, n1 - 1, x);
 			break;
@@ -808,6 +822,29 @@ namespace rwm {
 
 		mvwin(win, pos.y + offset.y, pos.x + offset.x);
 		mvwin(alt_win, pos.y + offset.y, pos.x + offset.x);
+	}
+
+	void Window::add_tabstop() {
+		int x, y;
+		getyx(win, y, x);
+		for (int i = 0; i < state.tabstop.size(); i++) {
+			if (x < state.tabstop[i]) {
+				state.tabstop.insert(state.tabstop.begin() + i, x);
+				return;
+			}
+		}
+		state.tabstop.push_back(x);
+	}
+
+	void Window::remove_tabstop() {
+		int x, y;
+		getyx(win, y, x);
+		for (int i = 0; i < state.tabstop.size(); i++) {
+			if (x == state.tabstop[i]) {
+				state.tabstop.erase(state.tabstop.begin() + i);
+				return;
+			}
+		}
 	}
 
 	void Window::manipulate_window() {
@@ -1070,6 +1107,21 @@ namespace rwm {
 					state.esc_type = buffer[i];
 					continue;
 
+					case '\t': {
+						int x, y;
+						getyx(win, y, x);
+						for (int p : state.tabstop) {
+							if (p > x) {
+								flush();
+								wmove(win, y, p);
+								goto cont;
+							}
+						}
+						break;
+					}
+					cont:
+					continue;
+
 					case '\r': {
 						if (state.out != "") {
 							flush();
@@ -1154,12 +1206,14 @@ namespace rwm {
 					continue;
 				}
 				switch (buffer[i]) {
-				case 'A' ... 'H': case 'S' ... 'T': case 'd' ... 'f':
+				case 'A' ... 'I': case 'S' ... 'T': case 'd' ... 'f':
 				case 's': case 'u': case 'n': case 'W': case 'Z': case '`' ... 'a':
 				if (state.esc_type == '[')
 					move_cursor(buffer[i]);
 				else if (state.esc_type == '(' && buffer[i] == 'B')
 					state.vt220 = false;
+				else if (state.esc_type == '\x1B' && buffer[i] == 'H')
+					add_tabstop();
 				else if (DEBUG) {
 					print_debug(state.esc_seq);
 					should_refresh = 1;
@@ -1202,6 +1256,18 @@ namespace rwm {
 						should_refresh = 1;
 					}
 				}
+				break;
+
+				case 'g':
+					if (state.esc_type == '[') {
+						if (state.ctrl[0] == 0)
+							remove_tabstop();
+						else if (state.ctrl[0] == 3)
+							state.tabstop.clear();
+					} else if (DEBUG) {
+						print_debug(state.esc_seq);
+						should_refresh = 1;
+					}
 				break;
 
 				case 't':

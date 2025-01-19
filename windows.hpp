@@ -69,6 +69,7 @@ namespace rwm {
 		int cursor = 1;                    // Current cursor state
 		std::string esc_seq = "";          // Current escape sequence
 		bool auto_nl = true;               // Line-wrap
+		std::vector<int> tabstop = {};     // List of tab stops
 	};
 
 	struct Window {
@@ -118,6 +119,8 @@ namespace rwm {
 		void move_cursor(char mode);          // Move cursor based on input char (for external API, use ncurses wmove(win, y, x))
 		void erase(char mode);                // Erase part of screen based on input char
 		void manipulate_window();             // Manipulate window
+		void add_tabstop();
+		void remove_tabstop();
 	};
 	
 	extern std::vector<Window*> windows;      // Currently open windows
