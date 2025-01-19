@@ -669,6 +669,10 @@ namespace rwm {
 			status = (status | ((mode == 'h') ? APP_CURSOR : 0)) & ~((mode == 'l') ? APP_CURSOR : 0);
 			break;
 
+			case 7:
+			state.auto_nl = (mode == 'h');
+			break;
+
 			case 25:
 			state.cursor = (mode == 'h') ? 1 : (mode == 'l') ? 0 : state.cursor;
 			break;
