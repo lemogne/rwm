@@ -879,6 +879,8 @@ namespace rwm {
 	}
 
 	void Window::flush() {
+		int x, y;
+		getyx(win, y, x);
 		apply_color_pair();
 		if (HAS_EXT_COLOR)
 			wattr_set(win, state.attrib, state.color_pair, nullptr);
@@ -886,13 +888,12 @@ namespace rwm {
 			wattrset(win, state.attrib | COLOR_PAIR(state.color_pair));
 		if (status & INSERT) {
 			winsstr(win, state.out.c_str());
+			wmove(win, y, x + utf8length(state.out));
 			return;
 		}
 
 		// Complicated scrolling code to override default ncurses scrolling behaviour
 		scrollok(win, FALSE);
-		int x, y;
-		getyx(win, y, x);
 		int maxlen;
 		if (state.auto_nl)
 			maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
