@@ -350,7 +350,6 @@ namespace rwm {
 			case KEY_BACKSPACE: case '\b':
 				c = '\b';
 				if (selected_window) {
-					wdelch(windows[SEL_WIN]->win);
 					windows[SEL_WIN]->send(c);
 				} else
 					rwm_desktop::key_pressed(c);
