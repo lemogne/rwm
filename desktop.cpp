@@ -492,7 +492,7 @@ namespace rwm_desktop {
 				if (has_colors())
 					use_default_colors();
 				endwin();
-				std::cerr << "Could not read Desktop!\n";
+				std::cerr << "Could not open Desktop!\n";
 			}
 		}
 		dirent* entry;
