@@ -863,7 +863,8 @@ namespace rwm {
 
 			case 'P':
 			flush();
-			wdelch(win);
+			for (int i = 0; i < n1; i++)
+				wdelch(win);
 			break;
 
 			case 'X': {
