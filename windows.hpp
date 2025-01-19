@@ -67,8 +67,8 @@ namespace rwm {
 		chtype attrib;                     // Current ncurses attribute state
 		ivec2 saved_cursor_pos = {0, 0};   // Saved cursor position
 		int cursor = 1;                    // Current cursor state
-		std::string esc_seq = "";
-		bool auto_nl = true;
+		std::string esc_seq = "";          // Current escape sequence
+		bool auto_nl = true;               // Line-wrap
 	};
 
 	struct Window {
