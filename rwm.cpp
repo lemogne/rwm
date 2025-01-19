@@ -188,17 +188,15 @@ namespace rwm {
 	}
 
 	void move_to_top(int i) {
-		std::string status = "\033[O";
 		if (windows[SEL_WIN]->status & REPORT_FOCUS)
-			windows[SEL_WIN]->send(status);
+			windows[SEL_WIN]->send("\033[O");
 
 		Window* sel = windows[i];
 		windows.erase(windows.begin() + i);
 		windows.push_back(sel);
 
-		status = "\033[I";
 		if (windows[SEL_WIN]->status & REPORT_FOCUS)
-			windows[SEL_WIN]->send(status);
+			windows[SEL_WIN]->send("\033[I");
 		windows[SEL_WIN]->should_refresh = true;
 	}
 
