@@ -137,7 +137,10 @@ namespace rwm {
 	}
 
 	void init() {
-		setlocale(LC_CTYPE, "");
+		if (force_convert)
+			setlocale(LC_CTYPE, "POSIX");
+		else
+			setlocale(LC_CTYPE, "");
 		initscr();
 		init_encoding();
 		cbreak();

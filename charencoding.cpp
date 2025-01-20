@@ -66,6 +66,7 @@ namespace rwm {
 
 	void init_encoding() {
 		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
+		no_lat_sup_a = std::string("POSIX").compare(nl_langinfo(CODESET));
 		is_tty = NULL == getenv("DISPLAY");
 		tty_get_avail_chars();
 		//utf8 = false;
@@ -263,7 +264,7 @@ namespace rwm {
 	}
 
 	void waddstr_enc(WINDOW* win, std::string string) {
-		if (utf8 && !force_convert && !is_tty) 
+		if (utf8 && !is_tty) 
 			waddstr(win, string.c_str());
 		else {
 			std::string out = "";
