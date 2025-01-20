@@ -285,12 +285,17 @@ namespace rwm {
 							:((c & 0xfe) ==  0xfc) ? 6 : 7;
 					}
 				} else {
+					if ((c & 0xc0) != 0x80) {
+						// c is not a valid continuation byte
+						waddstr(win, "?");
+						utfchar = "";
+					}
 					utfchar += c;
 					auto it = acs.find(utfchar);
 					auto itlsa = lat_sup_a.find(utfchar);
 					auto itutf8 = utf8_conv.find(utfchar);
 					auto itavail = available_chars.find(utfchar);
-					if (itavail != available_chars.end()) {
+					if (!force_convert && itavail != available_chars.end()) {
 						waddstr(win, utfchar.c_str());
 						utfchar = "";
 					} else if (it != acs.end()) {
