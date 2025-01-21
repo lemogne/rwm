@@ -19,7 +19,7 @@ namespace rwm {
 	std::unordered_map<std::string, std::string> accented_alt;
 	std::unordered_set<std::string> available_chars;
 	std::vector<std::string> reverse_video_chars;
-	bool force_convert = true;
+	bool force_convert = false;
 	bool do_accented_alt = true;
 	bool utf8 = true;
 	bool is_tty = false;
@@ -373,7 +373,7 @@ namespace rwm {
 	}
 
 	size_t utf8length(std::string string) {
-		if ((!is_tty || !utf8) && !force_convert) 
+		if (!utf8 && !force_convert) 
 			return string.length();
 		size_t l = 0;
 		for (char c : string)
@@ -382,7 +382,7 @@ namespace rwm {
 	}
 
 	std::string utf8substr(std::string string, size_t start, size_t size) {
-		if ((!is_tty || !utf8) && !force_convert) 
+		if (!utf8 && !force_convert) 
 			return string.substr(start, size);
 		size_t byte_start = 0, byte_size = 0, l = 0;
 		for (int i = 0; i < string.length(); i++) {
