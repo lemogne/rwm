@@ -43,7 +43,7 @@ namespace rwm {
 				wchar_t cp = std::strtoul(charcp, nullptr, 16);
 				available_chars.emplace(codepoint_to_utf8(cp));
 			}
-		} else if (!force_convert) {
+		} else if (force_convert) {
 			while(std::getline(umap, line)) {
 				size_t pos = line.find('\t');
 				const char* codepoint = line.substr(0, pos).c_str();
@@ -252,7 +252,7 @@ namespace rwm {
 	}
 
 	void waddstr_enc(WINDOW* win, std::string string) {
-		if (utf8 && !is_tty) 
+		if ((!is_tty || !utf8) && !force_convert) 
 			waddstr(win, string.c_str());
 		else {
 			std::string out = "";
@@ -274,11 +274,12 @@ namespace rwm {
 							:((c & 0xfe) ==  0xfc) ? 6 : 7;
 					}
 				} else {
-					if ((c & 0xc0) != 0x80) {
+					/*if ((c & 0xc0) != 0x80) {
 						// c is not a valid continuation byte
 						waddstr(win, "?");
 						utfchar = "";
-					}
+						continue;
+					}*/
 					utfchar += c;
 					auto it = acs.find(utfchar);
 					auto itutf8 = utf8_conv.find(utfchar);
@@ -311,6 +312,8 @@ namespace rwm {
 	}
 
 	size_t utf8length(std::string string) {
+		if ((!is_tty || !utf8) && !force_convert) 
+			return string.length();
 		size_t l = 0;
 		for (char c : string)
  			l += (c & 0xc0) != 0x80;
@@ -318,6 +321,8 @@ namespace rwm {
 	}
 
 	std::string utf8substr(std::string string, size_t start, size_t size) {
+		if ((!is_tty || !utf8) && !force_convert) 
+			return string.substr(start, size);
 		size_t byte_start = 0, byte_size = 0, l = 0;
 		for (int i = 0; i < string.length(); i++) {
 			if (l <= start)

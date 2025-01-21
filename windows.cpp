@@ -68,8 +68,11 @@ namespace rwm {
 		c_args.push_back(nullptr);
 
 		// Set environment vars
-		if (has_colors() && utf8)
+		if (has_colors())
 			setenv("TERM", "xterm-color", 1);
+
+		if (force_convert)
+			setenv("LC_ALL", "C.utf8", 1);
 
 		execvp(args[0].c_str(), c_args.data());
 
