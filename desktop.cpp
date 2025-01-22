@@ -1,4 +1,4 @@
-#include "desktop.hpp"
+#include "rwmdesktop.hpp"
 #include <termios.h>
 #include <fcntl.h>
 #include <pty.h>
@@ -13,39 +13,26 @@
 #include <algorithm>
 #include <sys/stat.h>
 #include <iostream>
-
-#define P_SEL_WIN (rwm::windows.back())
+#include "settings.cpp"
 
 namespace rwm_desktop {
-	rwm::ivec2 drag_pos = {-1, -1};
-	enum resize_modes {
-		OFF = 0,
-		DRAG_X = 1,
-		DRAG_Y = 2,
-		DRAG_XY = 3,
-		CHANGE_X = 4,
-		CHANGE_Y = 8,
-		KEYBOARD = 16
-	};
-	enum tiled_modes {
-		WINDOWED = 0,
-		TILED = 1,
-		TABBED = 2,
-		STACKING = 3,
-	};
 	int resize_mode = OFF;
 	bool should_refresh = false;
 	bool alt_pressed = false;
 	int tiled_mode = 0;
 	bool vertical_mode = false;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
+	std::string cwd = getenv("HOME");
 	std::vector<std::string> background_program = {};
 	rwm::Window* background;
 	bool should_draw_icons = true;
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
+	rwm::ivec2 win_size = {32, 95};
+	rwm::ivec2 drag_pos = {-1, -1};
 	rwm::ivec2 click = {-1, -1};
+	std::string shell = "bash";
 
 	// Colours 
 	int theme[2] = {-1, 12};
@@ -127,6 +114,7 @@ namespace rwm_desktop {
 			cell* c;
 			std::vector<int> indices;
 		};
+
 		void add(rwm::Window* win, cell_index& j) {
 			if (window != nullptr) {
 				vertical = vertical_mode;
@@ -533,6 +521,7 @@ namespace rwm_desktop {
 	}
 
 	void init() {
+		rwm_settings::read_settings("./settings.cfg");
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -543,7 +532,7 @@ namespace rwm_desktop {
 
 		init_widgets();
 		draw_icons();
-		chdir(getenv("HOME"));
+		chdir(cwd.c_str());
 		if (DEBUG) {
 			new_win(rwm::Window::create_debug());
 			should_refresh = true;
@@ -589,7 +578,7 @@ namespace rwm_desktop {
 			status = rwm::NO_EXIT;
 			input = input.substr(0, input.size() - 1);
 		}
-		new_win(new rwm::Window{{"bash", "-c", input}, win_pos, win_size, status});
+		new_win(new rwm::Window{{shell, "-c", input}, win_pos, win_size, status});
 		P_SEL_WIN->title = input;
 		rwm::selected_window = true;
 		noecho();
@@ -643,7 +632,7 @@ namespace rwm_desktop {
 			switch (key) {
 			case 13: {
 				int offset = rwm::windows.size();
-				new_win(new rwm::Window{{"bash"}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
+				new_win(new rwm::Window{{shell}, {10 + 5 * offset, 10 + 10 * offset}, win_size, 0});
 				should_refresh = true;
 				rwm::selected_window = true;
 				alt_pressed = false;
