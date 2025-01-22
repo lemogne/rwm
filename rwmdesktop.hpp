@@ -35,6 +35,8 @@ namespace rwm_desktop {
 		TABBED = 2,
 		STACKING = 3,
 	};
+	enum frame_state {IDLE = 0, TOP = 2, SELECTED = 4, RESIZE = 6};
+
 	extern int resize_mode;
 	extern bool should_refresh;
 	extern bool alt_pressed;
@@ -72,6 +74,9 @@ namespace rwm_desktop {
 
 	extern std::vector<Widget> widgets;
 
+	extern std::string frame_chars[8];
+	extern char ascii_frame_chars[8];
+
 	void draw_widgets();
 	void init_widgets();
 	void draw_taskbar();
@@ -81,6 +86,6 @@ namespace rwm_desktop {
 	void open_program(std::string input, rwm::ivec2 win_pos, rwm::ivec2 win_size);
 	void d_menu();
 	void click_taskbar(int x);
-
+	void do_frame(rwm::Window& win, frame_state state);
 }
 #endif

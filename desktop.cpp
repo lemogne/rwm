@@ -36,6 +36,9 @@ namespace rwm_desktop {
 	std::string rwm_dir = "";
 	std::string settings_path;
 
+	std::string frame_chars[8] = {"│", "─", "║", "═", "|", "-", "*", "*"};
+	char ascii_frame_chars[8] = {ACS_VLINE, ACS_HLINE, ACS_VLINE, ACS_HLINE, '|', '-', '*', '*'};
+
 	// Colours 
 	int theme[2] = {-1, 12};
 
@@ -921,6 +924,20 @@ namespace rwm_desktop {
 		return should_refresh;
 	}
 
+	void do_frame(rwm::Window& win, frame_state state) {
+		if (rwm::utf8) {
+			cchar_t vert_cc;
+			cchar_t horiz_cc;
+			wchar_t vert  = rwm::utf8_to_codepoint(frame_chars[state]);
+			wchar_t horiz = rwm::utf8_to_codepoint(frame_chars[state + 1]);
+			setcchar(&vert_cc, &vert, 0, 0, nullptr);
+			setcchar(&horiz_cc, &horiz, 0, 0, nullptr);
+			box_set(win.frame, &vert_cc, &horiz_cc);
+		} else {
+			box(win.frame, ascii_frame_chars[state], ascii_frame_chars[state + 1]);
+		}
+	}
+
 	bool frame_click(int i, rwm::ivec2 pos, int bstate) {
 		rwm::Window& win = *rwm::windows[i];
 		int f_begx, f_begy, f_maxx, f_maxy;
@@ -964,10 +981,7 @@ namespace rwm_desktop {
 			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
 			wattron(win.frame, A_REVERSE);
 			rwm::set_color_vga(stdscr, theme[1], theme[0]);
-			if (resize_mode & (CHANGE_X | CHANGE_Y)) 
-				box(win.frame, '*', '*');
-			else 
-				box(win.frame, '|', '-');
+			do_frame(win, (resize_mode & (CHANGE_X | CHANGE_Y)) ? RESIZE : SELECTED);
 			wattroff(win.frame, A_REVERSE);
 			wrefresh(win.frame);
 			wrefresh(win.win);
@@ -999,20 +1013,12 @@ namespace rwm_desktop {
 		rwm::set_color_vga(win.frame, theme[1], theme[0]);
 		if ((resize_mode & KEYBOARD) && is_focused) {
 			wattron(win.frame, A_REVERSE);
-			box(win.frame, '*', '*');
-		} else if (rwm::utf8) {
-			wattron(win.frame, A_REVERSE);
-			cchar_t vert_cc;
-			cchar_t horiz_cc;
-			wchar_t vert  = is_focused ? u'║' : u'│';
-			wchar_t horiz = is_focused ? u'═' : u'─';
-			setcchar(&vert_cc, &vert, 0, 0, nullptr);
-			setcchar(&horiz_cc, &horiz, 0, 0, nullptr);
-			box_set(win.frame, &vert_cc, &horiz_cc);
+			do_frame(win, RESIZE);
 		} else {
-			if (is_focused)
+			if (rwm::utf8 || is_focused) 
 				wattron(win.frame, A_REVERSE);
-			box(win.frame, ACS_VLINE, ACS_HLINE);
+
+			do_frame(win, is_focused ? TOP : IDLE);
 		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
 		if (!tiled_mode)

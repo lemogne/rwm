@@ -30,6 +30,11 @@ namespace rwm {
 		return convert.to_bytes(&codepoint, &codepoint + 1);
 	}
 
+	char32_t utf8_to_codepoint(std::string utf8char) {
+		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
+		return convert.from_bytes(utf8char)[0];
+	}
+
 	void tty_get_avail_chars() {
 		if (!is_tty)
 			return;
