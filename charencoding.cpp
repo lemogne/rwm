@@ -39,14 +39,14 @@ namespace rwm {
 		std::ifstream umap("/tmp/umap", std::ios::in);
 		std::string line;
 		if (utf8) {
-			while(std::getline(umap, line)) {
+			while (std::getline(umap, line)) {
 				size_t pos = line.find('\t');
 				const char* charcp = line.substr(pos + 3).c_str();
 				wchar_t cp = std::strtoul(charcp, nullptr, 16);
 				available_chars.emplace(codepoint_to_utf8(cp));
 			}
 		} else if (force_convert) {
-			while(std::getline(umap, line)) {
+			while (std::getline(umap, line)) {
 				size_t pos = line.find('\t');
 				std::string codepoint = line.substr(0, pos).c_str();
 				std::string charcp = line.substr(pos + 3).c_str();
@@ -320,7 +320,7 @@ namespace rwm {
 			std::string utfchar = "";
 			int n_cont_bytes = 0;
 			for (char c : string) {
-				if(utfchar.empty()) {
+				if (utfchar.empty()) {
 					if (c >= 0) 
 						out += c;
 					else {
