@@ -54,7 +54,6 @@ namespace rwm_desktop {
 	extern rwm::ivec2 click;
 	extern std::string shell;
 	extern std::string rwm_dir;
-	extern std::string settings_path;
 
 	// Colours 
 	extern int theme[2];

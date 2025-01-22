@@ -34,7 +34,6 @@ namespace rwm_desktop {
 	rwm::ivec2 click = {-1, -1};
 	std::string shell = "bash";
 	std::string rwm_dir = "";
-	std::string settings_path;
 
 	std::string frame_chars[8] = {"│", "─", "║", "═", "|", "-", "*", "*"};
 	char ascii_frame_chars[8] = {ACS_VLINE, ACS_HLINE, ACS_VLINE, ACS_HLINE, '|', '-', '*', '*'};
@@ -528,11 +527,11 @@ namespace rwm_desktop {
 	void init() {
 		if (rwm_dir.empty()) {
 			rwm_dir = getcwd(NULL, 0);
-			settings_path = rwm_dir + std::string("/settings.cfg");
 		} else {
 			erase();
 		}
-		rwm_settings::read_settings(settings_path);
+		rwm_settings::read_settings(rwm_dir + std::string("/settings.cfg"));
+		rwm_settings::read_settings(rwm_dir + std::string("/theme.cfg"));
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -763,10 +762,10 @@ namespace rwm_desktop {
 			return true;
 
 			case 'C':
-			rwm_settings::read_settings(settings_path);
+			rwm_settings::read_settings(rwm_dir + std::string("/settings.cfg"));
+			rwm_settings::read_settings(rwm_dir + std::string("/theme.cfg"));
 			should_refresh = true;
 			return true;
-
 
 			default:
 				break;

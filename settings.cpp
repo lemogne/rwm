@@ -6,7 +6,15 @@ namespace rwm_settings {
 	std::unordered_map<std::string, std::string*> string_vars = {
 		{"desktop_directory", &rwm_desktop::desktop_path},
 		{"cwd", &rwm_desktop::cwd},
-		{"default_shell", &rwm_desktop::shell}
+		{"default_shell", &rwm_desktop::shell},
+		{"frame_vert_idle",   &rwm_desktop::frame_chars[rwm_desktop::IDLE]},
+		{"frame_horz_idle",   &rwm_desktop::frame_chars[rwm_desktop::IDLE + 1]},
+		{"frame_vert_top",    &rwm_desktop::frame_chars[rwm_desktop::TOP]},
+		{"frame_horz_top",    &rwm_desktop::frame_chars[rwm_desktop::TOP + 1]},
+		{"frame_vert_sel",    &rwm_desktop::frame_chars[rwm_desktop::SELECTED]},
+		{"frame_horz_sel",    &rwm_desktop::frame_chars[rwm_desktop::SELECTED + 1]},
+		{"frame_vert_resize", &rwm_desktop::frame_chars[rwm_desktop::RESIZE]},
+		{"frame_horz_resize", &rwm_desktop::frame_chars[rwm_desktop::RESIZE + 1]},
 	};
 
 	std::unordered_map<std::string, std::vector<std::string>*> string_vec_vars = {
