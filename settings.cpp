@@ -69,6 +69,8 @@ namespace rwm_settings {
 		}
 
 		for (std::string line; std::getline(settings, line); ) {
+			if (line.length() == 0 || line[0] == '#' || line[0] == '[')
+				continue;
 			size_t pos = line.find('=');
 
 			std::string var = line.substr(0, pos);
