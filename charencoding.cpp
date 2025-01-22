@@ -34,7 +34,9 @@ namespace rwm {
 		if (!is_tty)
 			return;
 
-		system("setfont -ou /tmp/umap");
+		int status = system("setfont -ou /tmp/umap");
+		if (status) 
+			return;
 
 		std::ifstream umap("/tmp/umap", std::ios::in);
 		std::string line;

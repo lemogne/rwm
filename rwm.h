@@ -6,13 +6,14 @@
 #define MOUSE_MASK (MOUSE_PRESSED | MOUSE_RELEASED)
 
 namespace rwm {
-	void terminate();               // Terminate
-	void init();                    // Initialise WM
-	void move_to_top(int i);        // Move window i to the top
-	void set_selected(int i);       // Focus window i
-	int get_top_window(ivec2 pos);  // Get top (focused) window
-	bool is_on_frame(ivec2 pos);    // Check if position `pos` lies on frame of top window
-	void close_window(int i);       // Closes window i
-	void full_refresh();            // Fully refreshes the screen
+	void terminate();                            // Terminate
+	void init();                                 // Initialise WM
+	void move_to_top(int i);                     // Move window i to the top
+	void set_selected(int i);                    // Focus window i
+	int get_top_window(ivec2 pos);               // Get top (focused) window
+	bool is_on_frame(ivec2 pos);                 // Check if position `pos` lies on frame of top window
+	void close_window(int i);                    // Closes window i
+	void full_refresh();                         // Fully refreshes the screen
+	int spawn(std::vector<std::string> args);    // Spawns process
 }
 #endif

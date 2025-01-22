@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <stdio.h>
 #include <pty.h>
+#include <spawn.h>
 #include <unistd.h>
 #include "windows.hpp"
 #include "rwm.h"
@@ -134,6 +135,16 @@ namespace rwm {
 			use_default_colors();
 		endwin();
 		exit(0);
+	}
+
+	int spawn(std::vector<std::string> args) {
+		pid_t processID;
+		std::vector<char*> c_args;
+		for (std::string const& a : args)
+			c_args.emplace_back(const_cast<char*>(a.c_str()));
+		c_args.push_back(nullptr);
+
+		return posix_spawn(&processID, c_args[0], nullptr, nullptr, &c_args[0], environ);
 	}
 
 	void init() {

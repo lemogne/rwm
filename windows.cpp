@@ -653,11 +653,14 @@ namespace rwm {
 	}
 
 	void Window::do_osc() {
+		int ret;
 		if (state.ctrl[0] == 0 || state.ctrl[0] == 2) {
 			title = state.out;
+		} else if (state.ctrl[0] == 50) {
+			ret = spawn({"/bin/setfont", state.out});
 		} else if (state.ctrl[0] == 112) {
 			state.color = DEFAULT_COLOR;
-		}
+		} 
 	}
 
 	void Window::do_dcs() {
