@@ -35,11 +35,29 @@ namespace rwm_desktop {
 	std::string shell = "bash";
 	std::string rwm_dir = "";
 
+	// Theme 
+	int theme[2] = {-1, 12};
 	std::string frame_chars[8] = {"│", "─", "║", "═", "|", "-", "*", "*"};
 	char ascii_frame_chars[8] = {ACS_VLINE, ACS_HLINE, ACS_VLINE, ACS_HLINE, '|', '-', '*', '*'};
+	std::string buttons[3] = {"[rwm]", "[ - o x ]", "[]"};
 
-	// Colours 
-	int theme[2] = {-1, 12};
+	char icons[2][3][11] = {
+		{
+			"██╲",
+			"███",
+			"███",
+		},
+		{
+			"┌┐_",
+			"╲██",
+			"    ",
+		}
+	};
+
+	char icon_colors[2][2] = {
+		{-1, 7},
+		{-1, 11}
+	};
 
 	void set_selected(rwm::Window* win) {
 		for (int i = 0; i < rwm::windows.size(); i++) {
@@ -361,24 +379,6 @@ namespace rwm_desktop {
 		root_cell.remove(win);
 	}
 
-	char icons[2][3][11] = {
-		{
-			"██╲",
-			"███",
-			"███",
-		},
-		{
-			"┌┐_",
-			"╲██",
-			"    ",
-		}
-	};
-
-	char icon_colors[2][2] = {
-		{-1, 7},
-		{-1, 11}
-	};
-
 	struct Widget {
 		std::string draw_cmd;
 		std::string win_on_click;
@@ -443,21 +443,24 @@ namespace rwm_desktop {
 		attron(A_REVERSE);
 		rwm::set_color_vga(stdscr, theme[1], theme[0]);
 		mvaddstr(getmaxy(stdscr) - 1, 0, bar.c_str());
-		mvaddstr(getmaxy(stdscr) - 1, 0, "[rwm]");
+		mvaddstr(getmaxy(stdscr) - 1, 0, buttons[0].c_str());
 		for (rwm::Window* pwin : root_cell) {
 			rwm::Window& win = *pwin;
+			std::string display_title;
+
 			if (pwin == P_SEL_WIN && rwm::selected_window) 
 				attroff(A_REVERSE);
 			else
 				attron(A_REVERSE);
-			std::string display_title;
-			if (win.title.length() < tab_size) {
+
+			if (win.title.length() < tab_size)
 				display_title = win.title + std::string(tab_size - win.title.length(), ' ');
-			} else {
+			else
 				display_title = win.title.substr(0, tab_size - 3) + "...";
-			}
-			addstr(('[' + display_title + ']').c_str());
+
+			addstr((buttons[2][0] + display_title + buttons[2][1]).c_str());
 		}
+
 		draw_widgets();
 		attroff(A_REVERSE);
 	}
@@ -465,12 +468,14 @@ namespace rwm_desktop {
 	void draw_background() {
 		if (!background)
 			return;
+
 		background->render(false);
 	}
 
 	void draw_icons() {
 		if (!should_draw_icons)
 			return;
+
 		int y = 1;
 		int x = (spacing.x - 3) / 2;
 		int title_lines = 3;
@@ -495,15 +500,17 @@ namespace rwm_desktop {
 				wmove(stdscr, y + i, x);
 				rwm::waddstr_enc(stdscr, icons[is_dir][i], !rwm::utf8);
 			}
+
 			rwm::set_color_vga(stdscr, -1, -1);
 			std::string filename = entry->d_name;
 			desktop_contents.push_back(entry->d_name);
 			std::string display_name;
-			if (filename.length() < title_lines * (spacing.x - 1)) {
+
+			if (filename.length() < title_lines * (spacing.x - 1))
 				display_name = filename;
-			} else {
+			else
 				display_name = filename.substr(0, title_lines * spacing.x - 6) + "...";
-			}
+			
 			for (int line = 0; line < title_lines; line++) {
 				if (display_name.length() < (line + 1) * (spacing.x - 1)) {
 					mvaddstr(y + line + 3, x - (spacing.x - 3) / 2, display_name.substr(
@@ -515,6 +522,7 @@ namespace rwm_desktop {
 					mvaddstr(y + line + 3, x - (spacing.x - 3) / 2, display_name.substr(line * (spacing.x - 1), spacing.x - 1).c_str());
 				}
 			}
+
 			y += spacing.y;
 
 			if (y + spacing.y >= getmaxy(stdscr)) {
@@ -841,8 +849,8 @@ namespace rwm_desktop {
 
 
 	void click_taskbar(int x) {
-		int pos = (x - 4) / (tab_size + 2);
-		if (x <= 4) {
+		int pos = (x - buttons[0].length()) / (tab_size + 2);
+		if (x <= buttons[0].length()) {
 			// [rwm] 
 			d_menu();
 		} else if (pos < rwm::windows.size()) {
@@ -859,12 +867,15 @@ namespace rwm_desktop {
 						break;
 					}
 				}
+
 				rwm::selected_window = true;
 			}
+
 			should_refresh = true;
 		} else {
 			// Widget clicked
 			int p = getmaxx(stdscr) - 1;
+
 			for (int i = widgets.size() - 1; i >= 0; i--) {
 				p -= widgets[i].widget_size;
 				if (x >= p) {
@@ -895,6 +906,7 @@ namespace rwm_desktop {
 						P_SEL_WIN->title = name;
 						rwm::selected_window = true;
 					}
+
 					click = {-1, -1};
 				} else {
 					click = {y, x};
@@ -944,7 +956,7 @@ namespace rwm_desktop {
 		getmaxyx(win.frame, f_maxy, f_maxx);
 		rwm::ivec2 fpos = {pos.y - f_begy, pos.x - f_begx};
 		if (bstate & BUTTON1_PRESSED)  {
-			if (fpos.y == 0 && fpos.x >= f_maxx - 10 && fpos.x < f_maxx - 1) {
+			if (fpos.y == 0 && fpos.x >= f_maxx - 1 - buttons[1].length() && fpos.x < f_maxx - 1) {
 				should_refresh = true;
 				switch (fpos.x - f_maxx + 1) {
 				case -8 ... -7:
@@ -978,10 +990,12 @@ namespace rwm_desktop {
 			resize_mode |= ((fpos.y == 0 && (resize_mode & CHANGE_X)) || fpos.y == win.size.y - 1) ? CHANGE_Y : OFF;
 			resize_mode |= (fpos.y == 0) ? DRAG_Y : OFF;
 			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
+
 			wattron(win.frame, A_REVERSE);
 			rwm::set_color_vga(stdscr, theme[1], theme[0]);
 			do_frame(win, (resize_mode & (CHANGE_X | CHANGE_Y)) ? RESIZE : SELECTED);
 			wattroff(win.frame, A_REVERSE);
+
 			wrefresh(win.frame);
 			wrefresh(win.win);
 			win.should_refresh = false;
@@ -992,13 +1006,17 @@ namespace rwm_desktop {
 					(resize_mode & CHANGE_Y) ? win.size.y + pos.y - drag_pos.y : win.size.y, 
 					(resize_mode & CHANGE_X) ? win.size.x + pos.x - drag_pos.x : win.size.x
 				};
+
 				win.resize(new_size);
 				if (resize_mode & DRAG_X)
 					win.move_by({0, pos.x - drag_pos.x});
+
 				if (resize_mode & DRAG_Y)
 					win.move_by({pos.y - drag_pos.y, 0});
+
 			} else
 				win.move_by({pos.y - drag_pos.y, pos.x - drag_pos.x});
+
 			rwm::full_refresh();
 			drag_pos = {-1, -1};
 			should_refresh = false;
@@ -1021,7 +1039,8 @@ namespace rwm_desktop {
 		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
 		if (!tiled_mode)
-			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 10, "[ - o x ]");
+			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 10, buttons[1].c_str());
+
 		wattroff(win.frame, A_REVERSE);
 	}
 }

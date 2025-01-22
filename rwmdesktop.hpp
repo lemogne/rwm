@@ -19,7 +19,6 @@
 #define P_SEL_WIN (rwm::windows.back())
 
 namespace rwm_desktop {
-	extern rwm::ivec2 drag_pos;
 	enum resize_modes {
 		OFF = 0,
 		DRAG_X = 1,
@@ -37,6 +36,7 @@ namespace rwm_desktop {
 	};
 	enum frame_state {IDLE = 0, TOP = 2, SELECTED = 4, RESIZE = 6};
 
+	extern rwm::ivec2 drag_pos;
 	extern int resize_mode;
 	extern bool should_refresh;
 	extern bool alt_pressed;
@@ -55,8 +55,13 @@ namespace rwm_desktop {
 	extern std::string shell;
 	extern std::string rwm_dir;
 
-	// Colours 
+	// Theme 
 	extern int theme[2];
+	extern std::string buttons[3];
+	extern char icons[2][3][11];
+	extern char icon_colors[2][2];
+	extern std::string frame_chars[8];
+	extern char ascii_frame_chars[8];
 
 	void set_selected(rwm::Window* win);
 
@@ -64,18 +69,10 @@ namespace rwm_desktop {
 	struct Widget;
 
 	extern cell root_cell;
+	extern std::vector<Widget> widgets;
 
 	void new_win(rwm::Window* win);
 	void close_window(rwm::Window* win);
-
-	extern char icons[2][3][11];
-	extern char icon_colors[2][2];
-
-	extern std::vector<Widget> widgets;
-
-	extern std::string frame_chars[8];
-	extern char ascii_frame_chars[8];
-
 	void draw_widgets();
 	void init_widgets();
 	void draw_taskbar();
