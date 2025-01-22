@@ -33,6 +33,8 @@ namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
 	rwm::ivec2 click = {-1, -1};
 	std::string shell = "bash";
+	std::string rwm_dir = "";
+	std::string settings_path;
 
 	// Colours 
 	int theme[2] = {-1, 12};
@@ -521,7 +523,13 @@ namespace rwm_desktop {
 	}
 
 	void init() {
-		rwm_settings::read_settings("./settings.cfg");
+		if (rwm_dir.empty()) {
+			rwm_dir = getcwd(NULL, 0);
+			settings_path = rwm_dir + std::string("/settings.cfg");
+		} else {
+			erase();
+		}
+		rwm_settings::read_settings(settings_path);
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -745,6 +753,17 @@ namespace rwm_desktop {
 			rwm::terminate();
 			alt_pressed = false;
 			return true;
+
+			case 'R':
+			rwm_desktop::init();
+			should_refresh = true;
+			return true;
+
+			case 'C':
+			rwm_settings::read_settings(settings_path);
+			should_refresh = true;
+			return true;
+
 
 			default:
 				break;
