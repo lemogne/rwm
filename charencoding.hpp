@@ -1,3 +1,5 @@
+#ifndef RWM_CHARENC_H
+#define RWM_CHARENC_H
 #include <vector>
 #include <string>
 #include <ncurses.h>
@@ -7,8 +9,9 @@ namespace rwm {
 	extern bool utf8;                                          // Using UTF-8?
 	extern bool force_convert;                                 // Forcibly convert UTF-8 to ASCII
 	extern bool is_tty;
-	void waddstr_enc(WINDOW* win, std::string string);
+	void waddstr_enc(WINDOW* win, std::string string, bool forceconv = force_convert);
 	size_t utf8length(std::string string);
 	std::string utf8substr(std::string string, size_t start, size_t stop);
 	void init_encoding();
 }
+#endif

@@ -312,8 +312,8 @@ namespace rwm {
 		tty_get_avail_chars();
 	}
 
-	void waddstr_enc(WINDOW* win, std::string string) {
-		if ((!is_tty || !utf8) && !force_convert) 
+	void waddstr_enc(WINDOW* win, std::string string, bool forceconv = force_convert) {
+		if ((!is_tty || !utf8) && !forceconv) 
 			waddstr(win, string.c_str());
 		else {
 			std::string out = "";

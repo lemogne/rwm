@@ -489,7 +489,7 @@ namespace rwm_desktop {
 			rwm::set_color_vga(stdscr, icon_colors[is_dir][1], icon_colors[is_dir][0]);
 			for (int i = 0; i < 3; i++) {
 				wmove(stdscr, y + i, x);
-				rwm::waddstr_enc(stdscr, icons[is_dir][i]);
+				rwm::waddstr_enc(stdscr, icons[is_dir][i], !rwm::utf8);
 			}
 			rwm::set_color_vga(stdscr, -1, -1);
 			std::string filename = entry->d_name;
