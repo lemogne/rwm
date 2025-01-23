@@ -56,6 +56,47 @@ namespace rwm_settings {
 			it->second->push_back(line);
 	}
 
+	void set_color(std::unordered_map<const std::string, int*>::iterator it, std::string value) {
+		int* p = it->second;
+		int ctr = 0;
+		enum state {
+			NORMAL, BRACKET
+		};
+
+		state s = NORMAL;
+
+		for (char& c : value) {
+			if (s == NORMAL) {
+				if ('0' <= c && c <= '9') {
+					*p++ = c - '0';
+					ctr++;
+				} else if ('a' <= c && c <= 'f') {
+					*p++ = c - 'a' + 10;
+					ctr++;
+				} else if (c == '*') {
+					*p++ = -1;
+				} else if (c == '[') {
+					s = BRACKET;
+					*p = 0;
+				} else {
+					rwm::print_debug(std::string("Invalid color value ") + c + ".");
+				}
+			} else {
+				if ('0' <= c && c <= '9') {
+					*p *= 10;
+					*p += c - '0';
+				} else if (c == ']') {
+					p++;
+					ctr++;
+					s = NORMAL;
+				}
+			}
+
+			if (ctr >= 2)
+				return;
+		}
+	}
+
 	void set_int(std::unordered_map<const std::string, std::pair<int *, size_t>>::iterator it, std::string value) {
 		int* p = it->second.first;
 		size_t n = it->second.second;
@@ -110,6 +151,7 @@ namespace rwm_settings {
 			auto itstrvec = string_vec_vars.find(var);
 			auto itint = int_vars.find(var);
 			auto itbool = bool_vars.find(var);
+			auto itcol = color_vars.find(var);
 
 			if (itstr != string_vars.end())
 				set_str(itstr, value);
@@ -119,6 +161,8 @@ namespace rwm_settings {
 				set_int(itint, value);
 			else if (itbool != bool_vars.end())
 				set_bool(itbool, value);
+			else if (itcol != color_vars.end())
+				set_color(itcol, value);
 			else
 				rwm::print_debug("Variable not found: " + var);
 		}	
