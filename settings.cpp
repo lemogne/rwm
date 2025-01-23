@@ -27,9 +27,9 @@ namespace rwm_settings {
 	};
 	
 
-	std::unordered_map<std::string, int*> int_vars = {
-		{"task_tab_size", &rwm_desktop::tab_size},
-		{"default_window_size", &rwm_desktop::win_size.y}
+	std::unordered_map<std::string, std::pair<int*, size_t>> int_vars = {
+		{"task_tab_size", {&rwm_desktop::tab_size, 1}},
+		{"default_window_size", {&rwm_desktop::win_size.y, 2}}
 	};
 
 	std::unordered_map<std::string, bool*> bool_vars = {
