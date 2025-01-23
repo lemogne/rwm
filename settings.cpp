@@ -51,17 +51,24 @@ namespace rwm_settings {
 			it->second->push_back(line);
 	}
 
-	void set_int(std::unordered_map<const std::string, int *>::iterator it, std::string value) {
-		int* p = it->second;
+	void set_int(std::unordered_map<const std::string, std::pair<int *, size_t>>::iterator it, std::string value) {
+		int* p = it->second.first;
+		size_t n = it->second.second;
 		std::istringstream ss(value, std::ios::in);
-		for (std::string line; std::getline(ss, line, ' '); p++) {
+		std::string line;
+		for (int i = 0; i < n && std::getline(ss, line, ' '); i++) {
 			for (char& c : line) {
 				if (!std::isdigit(c)) {
-					rwm::print_debug("While parsing settings.cfg: Value '" + value + "' is not a valid non-negative integer constant for variable " + it->first);
+					rwm::print_debug(
+						  "While parsing settings.cfg: Value '" 
+						+ value 
+						+ "' is not a valid non-negative integer constant for variable " 
+						+ it->first
+					);
 					return;
 				}
 			}
-			*p = atoi(line.c_str());
+			*p++ = atoi(line.c_str());
 		}
 	}
 
@@ -71,7 +78,12 @@ namespace rwm_settings {
 		else if (!value.compare("false"))
 			*it->second = false;
 		else
-			rwm::print_debug("While parsing settings.cfg: Value '" + value + "' is not a valid boolean constant for variable " + it->first);
+			rwm::print_debug(
+				  "While parsing settings.cfg: Value '" 
+				+ value 
+				+ "' is not a valid boolean constant for variable " 
+				+ it->first
+			);
 	}
 
 	void read_settings(std::string path) {
