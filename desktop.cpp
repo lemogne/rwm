@@ -37,6 +37,7 @@ namespace rwm_desktop {
 
 	// Theme 
 	int theme[2] = {-1, 12};
+	int frame_theme[2] = {-1, 12};
 	std::string frame_chars[8] = {"│", "─", "║", "═", "|", "-", "*", "*"};
 	char ascii_frame_chars[8] = {ACS_VLINE, ACS_HLINE, ACS_VLINE, ACS_HLINE, '|', '-', '*', '*'};
 	std::string buttons[3] = {"[rwm]", "[ - o x ]", "[]"};
@@ -992,7 +993,7 @@ namespace rwm_desktop {
 			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
 
 			wattron(win.frame, A_REVERSE);
-			rwm::set_color_vga(stdscr, theme[1], theme[0]);
+			rwm::set_color_vga(stdscr, frame_theme[1], frame_theme[0]);
 			do_frame(win, (resize_mode & (CHANGE_X | CHANGE_Y)) ? RESIZE : SELECTED);
 			wattroff(win.frame, A_REVERSE);
 
@@ -1027,7 +1028,7 @@ namespace rwm_desktop {
 	}
 
 	void frame_render(rwm::Window& win, bool is_focused) {
-		rwm::set_color_vga(win.frame, theme[1], theme[0]);
+		rwm::set_color_vga(win.frame, frame_theme[1], frame_theme[0]);
 		if ((resize_mode & KEYBOARD) && is_focused) {
 			wattron(win.frame, A_REVERSE);
 			do_frame(win, RESIZE);

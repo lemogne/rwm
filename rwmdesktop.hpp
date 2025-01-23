@@ -57,6 +57,7 @@ namespace rwm_desktop {
 
 	// Theme 
 	extern int theme[2];
+	extern int frame_theme[2];
 	extern std::string buttons[3];
 	extern char icons[2][3][11];
 	extern char icon_colors[2][2];

@@ -22,6 +22,11 @@ namespace rwm_settings {
 		{"task_tab",          &rwm_desktop::buttons[2]},
 	};
 
+	std::unordered_map<std::string, int*> color_vars = {
+		{"taskbar",           &rwm_desktop::theme[0]},
+		{"frame",             &rwm_desktop::frame_theme[0]},
+	};
+
 	std::unordered_map<std::string, std::vector<std::string>*> string_vec_vars = {
 		{"background", &rwm_desktop::background_program},
 	};
