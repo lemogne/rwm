@@ -420,7 +420,7 @@ namespace rwm_desktop {
 		std::ifstream file;
 		std::string line;
 		std::string out;
-		file.open("widgets.cfg");
+		file.open(rwm_dir + "/etc/widgets.cfg");
 		while (getline(file, line)) {
 			try {
 				std::stringstream line_ss(line);
@@ -539,8 +539,8 @@ namespace rwm_desktop {
 		} else {
 			erase();
 		}
-		rwm_settings::read_settings(rwm_dir + std::string("/settings.cfg"));
-		rwm_settings::read_settings(rwm_dir + std::string("/theme.cfg"));
+		rwm_settings::read_settings(rwm_dir + std::string("/etc/settings.cfg"));
+		rwm_settings::read_settings(rwm_dir + std::string("/etc/theme.cfg"));
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -771,8 +771,8 @@ namespace rwm_desktop {
 			return true;
 
 			case 'C':
-			rwm_settings::read_settings(rwm_dir + std::string("/settings.cfg"));
-			rwm_settings::read_settings(rwm_dir + std::string("/theme.cfg"));
+			rwm_settings::read_settings(rwm_dir + "/etc/settings.cfg");
+			rwm_settings::read_settings(rwm_dir + "/etc/theme.cfg");
 			should_refresh = true;
 			return true;
 
