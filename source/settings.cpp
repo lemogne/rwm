@@ -1,4 +1,5 @@
 #include <fstream>
+#include <unordered_set>
 #include "rwmdesktop.hpp"
 #include "rwm.h"
 
@@ -143,6 +144,8 @@ namespace rwm_settings {
 			if (line.length() == 0 || line[0] == '#' || line[0] == '[')
 				continue;
 			size_t pos = line.find('=');
+			if (pos == line.npos) 
+				continue;
 
 			std::string var = line.substr(0, pos);
 			std::string value = line.substr(pos + 1);
@@ -165,6 +168,44 @@ namespace rwm_settings {
 				set_color(itcol, value);
 			else
 				rwm::print_debug("Variable not found: " + var);
+		}	
+	}
+
+	void read_envvars(std::string path) {
+		std::ifstream envvars(path, std::ios::in);
+		if (!envvars) {
+			rwm::print_debug("Environment variables file not found: " + path);
+			return;
+		}
+
+		for (std::string line; std::getline(envvars, line); ) {
+			if (line.length() == 0 || line[0] == '#' || line[0] == '[')
+				continue;
+			size_t pos = line.find('=');
+			if (pos == line.npos) 
+				continue;
+			
+			std::string var = line.substr(0, pos);
+			std::string rawvalue = line.substr(pos + 1);
+			if (rawvalue[0] == '~')
+				rawvalue = getenv("HOME") + rawvalue.substr(1);
+
+			std::string value;
+			size_t pvpos = 0;
+			size_t vpos;
+			for(vpos = rawvalue.find('$', 0); vpos != rawvalue.npos; vpos = rawvalue.find('$', vpos + 1)) {
+				value += rawvalue.substr(pvpos, vpos - pvpos);
+				pvpos = ++vpos;
+				while(vpos < rawvalue.length() && (isalnum(rawvalue[vpos]) || rawvalue[vpos] == '_'))
+					vpos++;
+				std::string varname = rawvalue.substr(pvpos, vpos - pvpos);
+				if (char* envval = getenv(varname.c_str()))
+					value += envval;
+				pvpos = vpos;
+			}
+			value += rawvalue.substr(pvpos, vpos - pvpos);
+
+			setenv(var.c_str(), value.c_str(), true);
 		}	
 	}
 };

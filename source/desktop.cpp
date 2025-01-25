@@ -539,6 +539,8 @@ namespace rwm_desktop {
 		} else {
 			erase();
 		}
+		setenv("RWM_HOME", rwm_dir.c_str(), true);
+		rwm_settings::read_envvars(rwm_dir + std::string("/etc/env.cfg"));
 		rwm_settings::read_settings(rwm_dir + std::string("/etc/settings.cfg"));
 		rwm_settings::read_settings(rwm_dir + std::string("/etc/theme.cfg"));
 		if (!background_program.empty()) {
