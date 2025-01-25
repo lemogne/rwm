@@ -11,13 +11,13 @@ do
 	fi
 done
 
-cd ./source
+(
+	cd ./source || exit 1
 
-if [ $separatelib = 1 ]; then
-	g++ --std=c++17 -shared -o ../libdesktop.so -fPIC desktop.cpp 
-	g++ --std=c++17 $args rwm.cpp windows.cpp charencoding.cpp -o ../rwm -lncursesw -L. -ldesktop -lutil
-else 
-	g++ --std=c++17 $args rwm.cpp windows.cpp desktop.cpp charencoding.cpp -o ../rwm -lncursesw -lutil
-fi
-
-cd ..
+	if [ $separatelib = 1 ]; then
+		g++ --std=c++17 -shared -o ../libdesktop.so -fPIC desktop.cpp 
+		g++ --std=c++17 $args rwm.cpp windows.cpp charencoding.cpp -o ../rwm -lncursesw -L. -ldesktop -lutil
+	else 
+		g++ --std=c++17 $args rwm.cpp windows.cpp desktop.cpp charencoding.cpp -o ../rwm -lncursesw -lutil
+	fi
+)
