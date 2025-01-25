@@ -84,5 +84,8 @@ namespace rwm_desktop {
 	void d_menu();
 	void click_taskbar(int x);
 	void do_frame(rwm::Window& win, frame_state state);
+	void close_fifo();
+	void open_fifo();
+	void read_fifo();
 }
 #endif

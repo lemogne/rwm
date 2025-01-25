@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=7.2
+Name=GNU Nano
+Comment=Nano's ANOther editor, inspired by Pico
+Exec=nano %U
+Terminal=false
+Type=Application
+StartupNotify=true
+MimeType=text/plain;application/x-zerosize;
+Icon=accessories-text-editor
+Categories=Utility;TextEditor;
+Keywords=text;editor;tabs;highlighting;code;pluggable;notepad;

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=0.5.3
+Name=w3m
+Comment=a text based web browser and pager
+Exec=w3m %U
+Terminal=false
+Type=Application
+StartupNotify=true
+MimeType=x-scheme-handler/http;x-scheme-handler/https;
+Categories=Utility;Network;

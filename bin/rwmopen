@@ -1,0 +1,2 @@
+#!/usr/bin/sh
+([ -e /tmp/rwm/open.fifo ] && (echo "$@" > /tmp/rwm/open.fifo)) || (echo "RWM window opening fifo not found!" >&2)

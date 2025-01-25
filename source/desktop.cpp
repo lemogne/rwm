@@ -1,4 +1,3 @@
-#include "rwmdesktop.hpp"
 #include <termios.h>
 #include <fcntl.h>
 #include <pty.h>
@@ -7,12 +6,13 @@
 #include <sstream>
 #include <fstream>
 #include <dirent.h>
-#include "rwm.h"
-#include "charencoding.hpp"
 #include <unistd.h>
 #include <algorithm>
 #include <sys/stat.h>
 #include <iostream>
+#include "rwm.h"
+#include "rwmdesktop.hpp"
+#include "charencoding.hpp"
 #include "settings.cpp"
 
 namespace rwm_desktop {
@@ -21,11 +21,13 @@ namespace rwm_desktop {
 	bool alt_pressed = false;
 	int tiled_mode = 0;
 	bool vertical_mode = false;
+	bool should_draw_icons = true;
 	std::string desktop_path = getenv("HOME") + std::string("/Desktop/");
 	std::string cwd = getenv("HOME");
-	std::vector<std::string> background_program = {};
+	char fifo_path[] = "/tmp/rwm/open.fifo";
+	int fifofd = -1;
 	rwm::Window* background;
-	bool should_draw_icons = true;
+	std::vector<std::string> background_program = {};
 	std::vector<std::string> desktop_contents = {};
 	int tab_size = 20;
 	rwm::ivec2 spacing = {6, 10};
@@ -551,6 +553,7 @@ namespace rwm_desktop {
 			draw_background();
 		}
 
+		open_fifo();
 		init_widgets();
 		draw_icons();
 		chdir(cwd.c_str());
@@ -562,7 +565,7 @@ namespace rwm_desktop {
 	}
 
 	void terminate() {
-		
+		close_fifo();
 	}
 
 	void render() {
@@ -909,9 +912,7 @@ namespace rwm_desktop {
 					if (pos < desktop_contents.size()) {
 						int offset = rwm::windows.size();
 						std::string name = desktop_contents[pos];
-						new_win(new rwm::Window{{"xdg-open", desktop_path + name}, {10 + 5 * offset, 10 + 10 * offset}, {32, 95}, 0});
-						P_SEL_WIN->title = name;
-						rwm::selected_window = true;
+						rwm::spawn({rwm_dir + "/bin/xdg-open", desktop_path + name});
 					}
 
 					click = {-1, -1};
@@ -924,6 +925,7 @@ namespace rwm_desktop {
 
 	bool update() {
 		static bool have_updated = false;
+		read_fifo();
 		if (tiled_mode && SEL_WIN >= 0)
 			rwm::selected_window = true;
 
@@ -1049,5 +1051,47 @@ namespace rwm_desktop {
 			mvwaddstr(win.frame, 0, getmaxx(win.frame) - 10, buttons[1].c_str());
 
 		wattroff(win.frame, A_REVERSE);
+	}
+
+	void close_fifo() {
+		if (fifofd != -1)
+			close(fifofd);
+		fifofd = -1;
+		remove(fifo_path);
+	}
+
+	void open_fifo() {
+		mkdir("/tmp/rwm", 0700);
+		close_fifo();
+		int ret = mkfifo(fifo_path, 0777);
+
+		if (ret) {
+			rwm::print_debug("Could not create rwm fifo!");
+			return;
+		}
+
+		fifofd = open(fifo_path, O_RDONLY | O_NONBLOCK);
+		if (fifofd == -1) {
+			rwm::print_debug("Could not open rwm fifo!");
+			return;
+		}
+	}
+
+	void read_fifo() {
+		char fifobuf[32768];
+		if (fifofd <= 0)
+			return;
+		int ret = read(fifofd, fifobuf, sizeof fifobuf);
+		if (ret <= 0)
+			return;
+
+		if (ret >= 2 && fifobuf[ret - 2] == '@')
+			fifobuf[ret - 1] = 0;
+		
+		std::string program = fifobuf;
+		int offset = rwm::windows.size();
+		open_program(program, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
+		P_SEL_WIN->title = program;
+		rwm::selected_window = true;
 	}
 }

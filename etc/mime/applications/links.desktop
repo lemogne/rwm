@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=2.9.0
+Name=Lynx
+Comment=a general purpose distributed information browser for the World Wide Web
+Exec=lynx %U
+Terminal=false
+Type=Application
+StartupNotify=true
+MimeType=x-scheme-handler/http;x-scheme-handler/https;
+Categories=Utility;Network;

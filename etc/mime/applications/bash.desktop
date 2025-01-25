@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=5.2.21
+Type=Application
+Exec=bash %U
+Icon=utilities-terminal
+StartupNotify=true
+Terminal=false
+Categories=Utility
+Name=Bash
+Comment=GNU Bourne-Again SHell
+
+NoDisplay=true
