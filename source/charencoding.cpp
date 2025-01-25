@@ -363,12 +363,17 @@ namespace rwm {
 							:((c & 0xfe) ==  0xfc) ? 6 : 7;
 					}
 				} else {
-					/*if ((c & 0xc0) != 0x80) {
+					if ((c & 0xc0) != 0x80) {
 						// c is not a valid continuation byte
 						waddstr(win, "?");
-						utfchar = "";
+						if (c >= 0) {
+							out = c;
+							utfchar = "";
+						}
+						else
+							utfchar = c;
 						continue;
-					}*/
+					}
 					utfchar += c;
 					auto it = acs.find(utfchar);
 					auto itutf8 = utf8_conv.find(utfchar);
