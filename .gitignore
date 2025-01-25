@@ -3,3 +3,5 @@
 rwm
 *.so
 ascii2utf8
+etc/mime:
+testing
