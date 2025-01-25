@@ -129,6 +129,7 @@ namespace rwm {
 	};
 
 	void terminate() {
+		rwm_desktop::terminate();
 		debug_log.close();
 		echo();
 		if (has_colors())

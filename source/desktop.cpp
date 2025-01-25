@@ -561,6 +561,10 @@ namespace rwm_desktop {
 		return;
 	}
 
+	void terminate() {
+		
+	}
+
 	void render() {
 		curs_set(0);
 		touchwin(stdscr);

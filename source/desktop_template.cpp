@@ -6,6 +6,11 @@ namespace rwm_desktop {
 		// Initialisation code
 	}
 
+	void terminate() {
+		// On termination
+		// Called by rwm::terminate(), do not call it here
+	}
+
 	void render() {
 		// Enter extra rendering code here
 		refresh();

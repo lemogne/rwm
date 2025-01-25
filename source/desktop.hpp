@@ -4,6 +4,7 @@
 
 namespace rwm_desktop {
 	void init();                                      // Initialise desktop
+	void terminate();                                 // Callback on termination
 	void render();                                    // Render the desktop
 	void key_pressed(int key);                        // Handle keypress (while focus on desktop)
 	bool key_priority(int key);                       // Handle any keypress (takes precedence over anything else; returns whether key was handled)
