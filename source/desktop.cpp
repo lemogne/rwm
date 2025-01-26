@@ -1085,13 +1085,11 @@ namespace rwm_desktop {
 		if (ret <= 0)
 			return;
 
-		if (ret >= 2 && fifobuf[ret - 2] == '@')
-			fifobuf[ret - 1] = 0;
-		
+		fifobuf[ret - 1] = 0; // remove \n character
 		std::string program = fifobuf;
 		int offset = rwm::windows.size();
 		open_program(program, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
-		P_SEL_WIN->title = program;
+		//P_SEL_WIN->title = program;
 		rwm::selected_window = true;
 	}
 }
