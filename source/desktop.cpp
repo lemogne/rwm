@@ -1030,11 +1030,13 @@ namespace rwm_desktop {
 				return false;
 			}
 			drag_pos = pos;
-			resize_mode &= KEYBOARD;
-			resize_mode |= (fpos.x == 0 || fpos.x == win.size.x - 1) ? CHANGE_X : OFF;
-			resize_mode |= ((fpos.y == 0 && (resize_mode & CHANGE_X)) || fpos.y == win.size.y - 1) ? CHANGE_Y : OFF;
-			resize_mode |= (fpos.y == 0) ? DRAG_Y : OFF;
-			resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
+			if (!(win.status & rwm::CANNOT_RESIZE)) {
+				resize_mode &= KEYBOARD;
+				resize_mode |= (fpos.x == 0 || fpos.x == win.size.x - 1) ? CHANGE_X : OFF;
+				resize_mode |= ((fpos.y == 0 && (resize_mode & CHANGE_X)) || fpos.y == win.size.y - 1) ? CHANGE_Y : OFF;
+				resize_mode |= (fpos.y == 0) ? DRAG_Y : OFF;
+				resize_mode |= (fpos.x == 0) ? DRAG_X : OFF;
+			}
 
 			wattron(win.frame, A_REVERSE);
 			rwm::set_color_vga(stdscr, frame_theme[1], frame_theme[0]);
@@ -1135,8 +1137,10 @@ namespace rwm_desktop {
 		new_win(new rwm::Window {
 			{"dialog", "--no-shadow", "--msgbox", msg, std::to_string(dim.y - 2), std::to_string(dim.x - 2)}, 
 			{10 + 5 * offset, 10 + 10 * offset}, 
-			dim, 0
+			dim, rwm::CANNOT_RESIZE
 		});
+		size_t p = msg.find('\n');
+		P_SEL_WIN->title = "RWM Info: " + msg.substr(0, p);
 		if (DEBUG)
 			rwm::print_debug(msg);
 	}

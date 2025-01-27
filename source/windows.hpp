@@ -29,6 +29,7 @@ namespace rwm {
 		INSERT = 256,           // Insert mode
 		MAXIMIZED = 512,        // Window is maximized
 		ZOMBIE = 1024,          // Window should be deleted but has not
+		CANNOT_RESIZE = 2048,   // Window cannot be resized
 	};
 
 	enum BOLD_MODE {

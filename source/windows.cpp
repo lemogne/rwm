@@ -238,6 +238,8 @@ namespace rwm {
 	}
 
 	void Window::maximize() {
+		if (status & CANNOT_RESIZE)
+			return;
 		if (status & rwm::FULLSCREEN) {
 			box(frame, ' ', ' ');
 			mvwin(frame, 0, 0);
@@ -284,7 +286,7 @@ namespace rwm {
 	}
 
 	void Window::resize(ivec2 size) {
-		if (status & (rwm::MAXIMIZED | rwm::FULLSCREEN)) 
+		if (status & (rwm::MAXIMIZED | rwm::FULLSCREEN | rwm::CANNOT_RESIZE)) 
 			return;
 
 		this->size = size;
