@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=4.8.33
+Type=Application
+Exec=mc %U
+StartupNotify=true
+Terminal=false
+Categories=Utility
+Name=Midnight Commander
+Comment=GNU Midnight Commander
