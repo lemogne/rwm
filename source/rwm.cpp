@@ -249,7 +249,7 @@ namespace rwm {
 	void close_window(int i) {
 		if (i < 0) 
 			return;
-		if (i == SEL_WIN) 
+		if (i == SEL_WIN && selected_window) 
 			set_selected(-1);
 		
 		if (windows[i]->destroy()) {
@@ -265,7 +265,7 @@ namespace rwm {
 	void full_refresh() {
 		rwm_desktop::render();
 		for (int i = 0; i < rwm::windows.size(); i++)
-			rwm::windows[i]->render(i == SEL_WIN);
+			rwm::windows[i]->render(i == SEL_WIN && selected_window);
 	}
 
 	inline int main() {
@@ -287,9 +287,9 @@ namespace rwm {
 						close_window(i);
 						should_refresh = true;
 					} else if (should_refresh && !(windows[i]->status & HIDDEN))
-						windows[i]->render(i == SEL_WIN);
+						windows[i]->render(i == SEL_WIN && selected_window);
 				} else if ((windows[i]->status & FROZEN) && should_refresh)
-					windows[i]->render(i == SEL_WIN);
+					windows[i]->render(i == SEL_WIN && selected_window);
 			}
 
 			if (SEL_WIN < 0)
