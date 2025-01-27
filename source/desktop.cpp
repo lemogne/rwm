@@ -35,7 +35,7 @@ namespace rwm_desktop {
 	rwm::ivec2 drag_pos = {-1, -1};
 	rwm::ivec2 click = {-1, -1};
 	std::string shell = "bash";
-	std::string rwm_dir = "";
+	std::string rwm_config = "";
 
 	// Theme 
 	int theme[2] = {-1, 12};
@@ -422,7 +422,7 @@ namespace rwm_desktop {
 		std::ifstream file;
 		std::string line;
 		std::string out;
-		file.open(rwm_dir + "/etc/widgets.cfg");
+		file.open(rwm_config + "/widgets.cfg");
 		while (getline(file, line)) {
 			try {
 				std::stringstream line_ss(line);
@@ -535,16 +535,27 @@ namespace rwm_desktop {
 		}
 	}
 
+	std::string find_in_path(std::string exe) {
+		std::string path = getenv("PATH");
+		std::istringstream pathss(path, std::ios::in);
+		for (std::string line; std::getline(pathss, line, ':');) {
+			if (!access((line + '/' + exe).c_str(), F_OK))
+				return line + '/' + exe;
+		}
+		return "";
+	}
+
 	void init() {
-		if (rwm_dir.empty()) {
-			rwm_dir = getcwd(NULL, 0);
+		if (rwm_config.empty()) {
+			rwm_config = getcwd(NULL, 0) + std::string("/etc");
 		} else {
 			erase();
 		}
-		setenv("RWM_HOME", rwm_dir.c_str(), true);
-		rwm_settings::read_envvars(rwm_dir + std::string("/etc/env.cfg"));
-		rwm_settings::read_settings(rwm_dir + std::string("/etc/settings.cfg"));
-		rwm_settings::read_settings(rwm_dir + std::string("/etc/theme.cfg"));
+		setenv("RWM_CFG", rwm_config.c_str(), true);
+		rwm_settings::read_envvars(rwm_config + std::string("/env.cfg"));
+		rwm_settings::read_settings(rwm_config + std::string("/settings.cfg"));
+		rwm_settings::read_settings(rwm_config + std::string("/theme.cfg"));
+
 		if (!background_program.empty()) {
 			rwm::ivec2 bgsize = {};
 			background = new rwm::Window(stdscr, "Background: " + background_program[0], rwm::FULLSCREEN | rwm::NO_EXIT, 0, 0);
@@ -780,8 +791,8 @@ namespace rwm_desktop {
 			return true;
 
 			case 'C':
-			rwm_settings::read_settings(rwm_dir + "/etc/settings.cfg");
-			rwm_settings::read_settings(rwm_dir + "/etc/theme.cfg");
+			rwm_settings::read_settings(rwm_config + "/settings.cfg");
+			rwm_settings::read_settings(rwm_config + "/theme.cfg");
 			should_refresh = true;
 			return true;
 
@@ -912,7 +923,7 @@ namespace rwm_desktop {
 					if (pos < desktop_contents.size()) {
 						int offset = rwm::windows.size();
 						std::string name = desktop_contents[pos];
-						rwm::spawn({rwm_dir + "/bin/xdg-open", desktop_path + name});
+						rwm::spawn({find_in_path("xdg-open"), desktop_path + name});
 					}
 
 					click = {-1, -1};

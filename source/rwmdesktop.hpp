@@ -53,7 +53,7 @@ namespace rwm_desktop {
 	extern rwm::ivec2 win_size;
 	extern rwm::ivec2 click;
 	extern std::string shell;
-	extern std::string rwm_dir;
+	extern std::string rwm_config;
 
 	// Theme 
 	extern int theme[2];
@@ -87,5 +87,6 @@ namespace rwm_desktop {
 	void close_fifo();
 	void open_fifo();
 	void read_fifo();
+	std::string find_in_path(std::string exe);
 }
 #endif
