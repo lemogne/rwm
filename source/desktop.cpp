@@ -620,6 +620,13 @@ namespace rwm_desktop {
 			case '\x03':
 			rwm::terminate();
 			break;
+
+			case '\t':
+			if (rwm::windows.size() > 0) {
+				rwm::selected_window = true;
+				should_refresh = true;
+			}
+			break;
 		}
 	}
 
