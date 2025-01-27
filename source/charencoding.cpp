@@ -81,6 +81,11 @@ namespace rwm {
 			available_chars.clear();
 	}
 
+	bool is_CJK(std::string utfchar) {
+		char32_t c = utf8_to_codepoint(utfchar);
+		return 0x2e80 <= c && c <= 0xa4cf;
+	}
+
 	void init_encoding() {
 		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
 		is_tty = NULL == getenv("DISPLAY");
@@ -395,7 +400,10 @@ namespace rwm {
 						waddstr(win, ch.c_str());
 						utfchar = "";
 					} else if (utfchar.length() >= n_cont_bytes) {
-						waddstr(win, "?");
+						if (is_CJK(utfchar))
+							waddstr(win, "??");
+						else
+							waddstr(win, "?");
 						utfchar = "";
 					}
 				}
