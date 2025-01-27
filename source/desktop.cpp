@@ -559,7 +559,7 @@ namespace rwm_desktop {
 						break;
 					
 					case 'v':
-						printf("RWM version %s\nRWM Desktop version %s\n", rwm::version, rwm_desktop::version);
+						printf("RWM version %s\nRWM Desktop version %s\n", rwm::version.c_str(), rwm_desktop::version.c_str());
 						exit(0);
 						break;
 					
