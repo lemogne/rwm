@@ -545,9 +545,23 @@ namespace rwm_desktop {
 		return "";
 	}
 
+	void parse_args(int argc, char* argv[]) {
+		for (int i = 1; i < argc; i++) {
+			if (argv[i][0] != '-')
+				continue;
+			
+			for (int k = 1; argv[i][k]; k++) {
+				switch(argv[i][k]) {
+					case 'l':
+						rwm_config = getcwd(NULL, 0) + std::string("/etc");
+				}
+			}
+		}
+	}
+
 	void init() {
 		if (rwm_config.empty()) {
-			rwm_config = getcwd(NULL, 0) + std::string("/etc");
+			rwm_config = getenv("HOME") + std::string("/.config/rwm");
 		} else {
 			erase();
 		}

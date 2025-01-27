@@ -6,6 +6,10 @@ namespace rwm_desktop {
 		// Initialisation code
 	}
 
+	void parse_args(int argc, char* argv[]) {
+		// Parse argv n stuff
+	}
+
 	void terminate() {
 		// On termination
 		// Called by rwm::terminate(), do not call it here

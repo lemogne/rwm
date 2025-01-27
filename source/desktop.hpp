@@ -3,6 +3,7 @@
 #include "windows.hpp"
 
 namespace rwm_desktop {
+	void parse_args(int argc, char* argv[]);          // Parse RWM input arguments
 	void init();                                      // Initialise desktop
 	void terminate();                                 // Callback on termination
 	void render();                                    // Render the desktop

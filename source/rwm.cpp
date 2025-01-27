@@ -400,9 +400,10 @@ namespace rwm {
 		}
 		terminate();
 	}
-}
-
-int main(void) {
-	return rwm::main();
 };
+
+int main(int argc, char* argv[]) {
+	rwm_desktop::parse_args(argc, argv);
+	return rwm::main();
+}
 
