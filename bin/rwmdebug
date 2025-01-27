@@ -1,0 +1,7 @@
+#!/usr/bin/sh
+stty -echo
+while true; do
+	read -r p 
+	echo "$p"
+done
+stty echo

@@ -165,48 +165,16 @@ namespace rwm {
 
 	Window* Window::create_debug() {
 		// init debug window
-		WINDOW* w = newwin(33, 95, 10, 10);
-		if (!w) {
-			printf("Could not create debug window!\n");
-			exit(1);
-		}
-		int x, y;
-		getbegyx(w, y, x);
-		getmaxyx(w, y, x);
-	
-		int master, slave;
-		ivec2 size_win = {31, 93};
-
-		winsize wsize;
-		if (ioctl(0, TIOCGWINSZ, (char *) &wsize) < 0)
-			printf("TIOCGWINSZ error");
-		wsize.ws_xpixel = (wsize.ws_xpixel / wsize.ws_col) * size_win.x;
-		wsize.ws_ypixel = (wsize.ws_ypixel / wsize.ws_row) * size_win.y;
-		wsize.ws_row = size_win.y;
-		wsize.ws_col = size_win.x;
-
-		if (openpty(&master, &slave, nullptr, nullptr, &wsize)) {
-			// For now
-			exit(1);
-		}
-
-		int flags = fcntl(master, F_GETFL, 0);
-		fcntl(master, F_SETFL, flags | O_NONBLOCK);
-
-		termios term_settings{};
-		tcgetattr(slave, &term_settings);
-		cfmakeraw(&term_settings);
-		tcsetattr(slave, TCSANOW | ECHO | ISIG, &term_settings);
-
+		Window* w = new Window({"rwmdebug"}, {10, 10}, {33, 95}, 0);
+		w->title = "DEBUG WINDOW";
 		close(2);
-		int a = dup(slave);
-		close(slave);
-		slave = 2;
+		dup(w->master);
+		w->master = 2;
 
 		setsid();
 		ioctl(2, TIOCSCTTY, 1);
 		
-		return new Window(w, "DEBUG WINDOW", 0, master, slave);
+		return w;
 	}
 
 	void Window::render(bool is_focused) {
@@ -1101,7 +1069,7 @@ namespace rwm {
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
-				if (buffer[i] < 32 && DEBUG && slave != 2)
+				if (buffer[i] < 32 && DEBUG && master != 2)
 					print_debug(((buffer[i] != 10 && buffer[i] != 13) ? std::string(1, buffer[i]) : "\\n") + ' ' + std::to_string((int) buffer[i]));
 				switch (buffer[i]) {
 					case '\x1B':
@@ -1363,7 +1331,7 @@ namespace rwm {
 				continue;
 				}
 				state.is_text = true;
-				if (DEBUG && slave != 2)
+				if (DEBUG && master != 2)
 					print_debug(state.esc_seq);
 				state.out = "";
 				continue;
