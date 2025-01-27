@@ -89,6 +89,7 @@ namespace rwm_desktop {
 	void close_fifo();
 	void open_fifo();
 	void read_fifo();
+	void show_info(std::string msg);
 	std::string find_in_path(std::string exe);
 }
 #endif

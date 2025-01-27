@@ -80,7 +80,7 @@ namespace rwm_settings {
 					s = BRACKET;
 					*p = 0;
 				} else {
-					rwm::print_debug(std::string("Invalid color value ") + c + ".");
+					rwm_desktop::show_info(std::string("Invalid color value ") + c + ".");
 				}
 			} else {
 				if ('0' <= c && c <= '9') {
@@ -106,7 +106,7 @@ namespace rwm_settings {
 		for (int i = 0; i < n && std::getline(ss, line, ' '); i++) {
 			for (char& c : line) {
 				if (!std::isdigit(c)) {
-					rwm::print_debug(
+					rwm_desktop::show_info(
 						  "While parsing settings.cfg: Value '" 
 						+ value 
 						+ "' is not a valid non-negative integer constant for variable " 
@@ -125,8 +125,8 @@ namespace rwm_settings {
 		else if (!value.compare("false"))
 			*it->second = false;
 		else
-			rwm::print_debug(
-				  "While parsing settings.cfg: Value '" 
+			rwm_desktop::show_info(
+				  "While parsing Settings: Value '" 
 				+ value 
 				+ "' is not a valid boolean constant for variable " 
 				+ it->first
@@ -136,7 +136,7 @@ namespace rwm_settings {
 	void read_settings(std::string path) {
 		std::ifstream settings(path, std::ios::in);
 		if (!settings) {
-			rwm::print_debug("Settings file not found: " + path);
+			rwm_desktop::show_info("Settings file not found: " + path);
 			return;
 		}
 
@@ -167,14 +167,14 @@ namespace rwm_settings {
 			else if (itcol != color_vars.end())
 				set_color(itcol, value);
 			else
-				rwm::print_debug("Variable not found: " + var);
+				rwm_desktop::show_info("Settings: Variable not found: " + var);
 		}	
 	}
 
 	void read_envvars(std::string path) {
 		std::ifstream envvars(path, std::ios::in);
 		if (!envvars) {
-			rwm::print_debug("Environment variables file not found: " + path);
+			rwm_desktop::show_info("Environment variables file not found: " + path);
 			return;
 		}
 

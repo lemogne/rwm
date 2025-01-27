@@ -1102,13 +1102,13 @@ namespace rwm_desktop {
 		int ret = mkfifo(fifo_path, 0777);
 
 		if (ret) {
-			rwm::print_debug("Could not create rwm fifo!");
+			show_info("Could not create rwm fifo!");
 			return;
 		}
 
 		fifofd = open(fifo_path, O_RDONLY | O_NONBLOCK);
 		if (fifofd == -1) {
-			rwm::print_debug("Could not open rwm fifo!");
+			show_info("Could not open rwm fifo!");
 			return;
 		}
 	}
@@ -1127,5 +1127,17 @@ namespace rwm_desktop {
 		open_program(program, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
 		//P_SEL_WIN->title = program;
 		rwm::selected_window = true;
+	}
+
+	void show_info(std::string msg) {
+		int offset = rwm::windows.size();
+		rwm::ivec2 dim = {7, 52};
+		new_win(new rwm::Window {
+			{"dialog", "--no-shadow", "--msgbox", msg, std::to_string(dim.y - 2), std::to_string(dim.x - 2)}, 
+			{10 + 5 * offset, 10 + 10 * offset}, 
+			dim, 0
+		});
+		if (DEBUG)
+			rwm::print_debug(msg);
 	}
 }
