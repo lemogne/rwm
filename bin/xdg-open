@@ -303,7 +303,7 @@ get_key() {
 # Returns true if argument is a file:// URL or path
 is_file_url_or_path() {
 	if echo "$1" | grep -q '^file://' \
-			|| ! echo "$1" | egrep -q '^[[:alpha:]+\.\-]+:'; then
+			|| ! echo "$1" | grep -Eq '^[[:alpha:]+\.\-]+:'; then
 		return 0
 	else
 		return 1
