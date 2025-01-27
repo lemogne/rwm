@@ -6,6 +6,7 @@
 #define MOUSE_MASK (MOUSE_PRESSED | MOUSE_RELEASED)
 
 namespace rwm {
+	extern const std::string version;                  // Version
 	void terminate();                            // Terminate
 	void init();                                 // Initialise WM
 	void move_to_top(int i);                     // Move window i to the top

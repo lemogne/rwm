@@ -9,6 +9,7 @@
 #include "charencoding.hpp"
 
 namespace rwm {
+	const std::string version = "0.9";
 	// Key Codes
 	std::unordered_map<int, std::string> key_conversion = {
 		// Normal

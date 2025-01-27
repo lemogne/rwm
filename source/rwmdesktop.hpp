@@ -19,6 +19,8 @@
 #define P_SEL_WIN (rwm::windows.back())
 
 namespace rwm_desktop {
+	extern const std::string version;
+
 	enum resize_modes {
 		OFF = 0,
 		DRAG_X = 1,

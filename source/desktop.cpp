@@ -16,6 +16,8 @@
 #include "settings.cpp"
 
 namespace rwm_desktop {
+	const std::string version = "0.9";
+
 	int resize_mode = OFF;
 	bool should_refresh = false;
 	bool alt_pressed = false;
@@ -554,6 +556,14 @@ namespace rwm_desktop {
 				switch(argv[i][k]) {
 					case 'l':
 						rwm_config = getcwd(NULL, 0) + std::string("/etc");
+						break;
+					
+					case 'v':
+						printf("RWM version %s\nRWM Desktop version %s\n", rwm::version, rwm_desktop::version);
+						break;
+					
+					default:
+						break;
 				}
 			}
 		}
