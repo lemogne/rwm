@@ -24,6 +24,13 @@ namespace rwm {
 	bool utf8 = true;
 	bool is_tty = false;
 
+	std::vector<std::string> ASCII_names = {
+		"NULL", "START HEAD", "START TEXT", "END TEXT", "END FILE", "ENQUIRY", "ACK", "BELL",
+		"BACKSPACE", "TAB", "NEW LINE", "VERT TAB", "FORM FEED", "RETURN", "SHIFT OUT", "SHIFT IN",
+		"DATA LINK ESC", "DEV CON 1", "DEV CON 2", "DEV CON 3", "DEV CON 4", "NAK", "SYN", "END TRANS BLOCK",
+		"CANCEL", "END MEDIUM", "SUB", "ESCAPE", "FILE SEP", "GROUP SEP", "RECORD SEP", "UNIT SEP"
+	};
+
 	// Source: StackOverflow (https://stackoverflow.com/questions/56341221/how-to-convert-a-codepoint-to-utf-8)
 	std::string codepoint_to_utf8(char32_t codepoint) {
 		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
