@@ -83,7 +83,7 @@ namespace rwm {
 
 	bool is_CJK(std::string utfchar) {
 		char32_t c = utf8_to_codepoint(utfchar);
-		return 0x2e80 <= c && c <= 0xa4cf;
+		return (0x2e80 <= c && c <= 0xa4cf) || (0xac00 <= c && c <= 0xd7ff);
 	}
 
 	void init_encoding() {
