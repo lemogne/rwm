@@ -70,6 +70,7 @@ namespace rwm {
 		int cursor = 1;                    // Current cursor state
 		std::string esc_seq = "";          // Current escape sequence
 		bool auto_nl = true;               // Line-wrap
+		bool line_wrap = true;             // Line-wrap
 		std::vector<int> tabstop = {};     // List of tab stops
 	};
 

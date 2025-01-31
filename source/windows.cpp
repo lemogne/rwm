@@ -647,7 +647,7 @@ namespace rwm {
 			break;
 
 			case 7:
-			state.auto_nl = (mode == 'h');
+			state.line_wrap = (mode == 'h');
 			break;
 
 			case 25:
@@ -995,7 +995,7 @@ namespace rwm {
 		// Complicated scrolling code to override default ncurses scrolling behaviour
 		scrollok(win, FALSE);
 		int maxlen;
-		if (state.auto_nl)
+		if (state.line_wrap)
 			maxlen = getmaxx(win) - x + ((getmaxy(win) - y - 1) * (getmaxx(win) - 1));
 		else
 			maxlen = getmaxx(win) - x + 1;
@@ -1003,7 +1003,7 @@ namespace rwm {
 		if (DEBUG)
 			debug_log << utf8substr(state.out, 0, maxlen) << '\n';
 
-		if (state.auto_nl) {
+		if (state.line_wrap) {
 			for (int i = maxlen; i < utf8length(state.out); i += getmaxx(win) - 1) {
 				scrollok(win, TRUE);
 				scroll(win);
@@ -1043,7 +1043,9 @@ namespace rwm {
 	}
 
 	void Window::send(char c) {
-		if (!(status & ZOMBIE))
+		if (c == '\r' && state.auto_nl) 
+			send("\r\n");
+		else if (!(status & ZOMBIE))
 			write(master, &c, 1);
 	}
 
@@ -1117,6 +1119,8 @@ namespace rwm {
 						}
 						int x, y, top, bot;
 						getyx(win, y, x);
+						if (state.auto_nl)
+							x = 0;
 						wgetscrreg(win, &top, &bot);
 						if (y >= bot) {
 							scroll(win);
