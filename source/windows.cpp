@@ -748,6 +748,8 @@ namespace rwm {
 			case 'S':
 			wscrl(win, n1);
 			break;
+
+			case '^':
 			case 'T':
 			wscrl(win, -n1);
 			break;
