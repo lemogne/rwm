@@ -38,6 +38,7 @@ namespace rwm_desktop {
 	rwm::ivec2 click = {-1, -1};
 	std::string shell = "bash";
 	std::string rwm_config = "";
+	std::string rwm_bin = "";
 
 	// Theme 
 	int theme[2] = {-1, 12};
@@ -556,6 +557,7 @@ namespace rwm_desktop {
 				switch(argv[i][k]) {
 					case 'l':
 						rwm_config = getcwd(NULL, 0) + std::string("/etc");
+						rwm_bin = getcwd(NULL, 0) + std::string("/bin");
 						break;
 					
 					case 'v':
@@ -573,10 +575,12 @@ namespace rwm_desktop {
 	void init() {
 		if (rwm_config.empty()) {
 			rwm_config = getenv("HOME") + std::string("/.config/rwm");
+			rwm_config = "/usr/bin/rwmbin";
 		} else {
 			erase();
 		}
 		setenv("RWM_CFG", rwm_config.c_str(), true);
+		setenv("RWM_BIN", rwm_bin.c_str(), true);
 		rwm_settings::read_envvars(rwm_config + std::string("/env.cfg"));
 		rwm_settings::read_settings(rwm_config + std::string("/settings.cfg"));
 		rwm_settings::read_settings(rwm_config + std::string("/theme.cfg"));

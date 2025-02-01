@@ -14,10 +14,9 @@ fi
 # Straightforward: user is unlikely to have these files installed
 cp rwm bin/rwmdebug bin/rwnopen /usr/bin
 mkdir -p "$HOME/.config/rwm"
-cp etc/*.cfg "$HOME/.config/rwm"
+cp -r etc/* "$HOME/.config/rwm"
 
-
-# Convoluted: we need to check if these files already exist, ans if so, adjust where we install them
+# Convoluted: we need to check if these files already exist, and if so, adjust where we install them
 
 if [ ! -f /usr/bin/xdg-mime ]; then
 	# This is fine since our xdg-mime is unmodified
@@ -28,7 +27,3 @@ fi
 # he may want to do so later, which would either conflict with or replace our version, which will break things
 mkdir -p /usr/bin/rwmbin
 cp xdg-open /usr/bin/rwmbin/xdg-open
-
-# Similar considerations for mime databases
-
-# ...
