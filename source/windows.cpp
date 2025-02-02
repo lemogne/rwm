@@ -630,12 +630,15 @@ namespace rwm {
 			ret = spawn({"/bin/setfont", state.out});
 		} else if (state.ctrl[0] == 112) {
 			state.color = DEFAULT_COLOR;
-		} 
+		} else if (DEBUG)
+			print_debug(state.esc_seq);
 	}
 
 	void Window::do_dcs() {
 		//char error_msg[] = "\033P0$r\033\\";
 		//write(windows[SEL_WIN]->master, error_msg, sizeof(error_msg) - 1);
+		if (DEBUG)
+			print_debug(state.esc_seq);
 	}	
 
 	void Window::do_private_seq(char mode) {
@@ -762,7 +765,12 @@ namespace rwm {
 			break;
 
 			case 'n':
-			if (n1 == 6) {
+			if (n1 == 5) {
+				std::string response = "\033[0n";
+				send(response);
+				if (DEBUG)
+					print_debug(response);
+			} else if (n1 == 6) {
 				std::string response = "\033[" + std::to_string(y + 1) + ';' + std::to_string(x + 1) + 'R';
 				send(response);
 				if (DEBUG)
@@ -1178,8 +1186,6 @@ namespace rwm {
 				} else if (state.esc_type == '\x90') {
 					if (buffer[i] == '\\' || buffer[i] == '\7') {
 						do_dcs();
-						if (DEBUG)
-							print_debug(state.esc_seq);
 						should_refresh = 1;
 						state.is_text = true;
 						state.out = "";
@@ -1283,6 +1289,15 @@ namespace rwm {
 				}
 				break;
 
+				case 'c':
+				if (state.esc_type == '[') {
+					send("\033[?6c");
+				} else if (DEBUG) {
+					print_debug(state.esc_seq);
+					should_refresh = 1;
+				}
+				break;
+
 				case '\x1B':
 				state.ctrl.clear();
 				state.esc_type = '\x1B';
@@ -1337,8 +1352,8 @@ namespace rwm {
 				continue;
 				}
 				state.is_text = true;
-				if (DEBUG && master != 2)
-					print_debug(state.esc_seq);
+				//if (DEBUG && master != 2)
+				//	print_debug(state.esc_seq);
 				state.out = "";
 				continue;
 			}

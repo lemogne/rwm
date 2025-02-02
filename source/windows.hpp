@@ -12,7 +12,7 @@
 #else
 #define HAS_EXT_COLOR false
 #endif
-#define DEBUG false
+#define DEBUG true
 
 namespace rwm {
 	extern std::ofstream debug_log;
