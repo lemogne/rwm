@@ -540,6 +540,7 @@ namespace rwm_desktop {
 				x += spacing.x;
 			}
 		}
+		closedir(dirp);
 	}
 
 	std::string find_in_path(std::string exe) {
