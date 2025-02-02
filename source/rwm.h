@@ -6,7 +6,7 @@
 #define MOUSE_MASK (MOUSE_PRESSED | MOUSE_RELEASED)
 
 namespace rwm {
-	extern const std::string version;                  // Version
+	extern const std::string version;            // Version
 	void terminate();                            // Terminate
 	void init();                                 // Initialise WM
 	void move_to_top(int i);                     // Move window i to the top
@@ -16,5 +16,6 @@ namespace rwm {
 	void close_window(int i);                    // Closes window i
 	void full_refresh();                         // Fully refreshes the screen
 	int spawn(std::vector<std::string> args);    // Spawns process
+	extern int sleep_time;                       // Time that RWM waits before next refresh
 }
 #endif

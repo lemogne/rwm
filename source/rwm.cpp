@@ -10,6 +10,7 @@
 
 namespace rwm {
 	const std::string version = "0.9";
+	int sleep_time = 0;
 	// Key Codes
 	std::unordered_map<int, std::string> key_conversion = {
 		// Normal
@@ -397,7 +398,7 @@ namespace rwm {
 					rwm_desktop::key_pressed(c);
 				break;
 			}
-			//usleep(20000);
+			usleep(sleep_time);
 		}
 		terminate();
 	}
