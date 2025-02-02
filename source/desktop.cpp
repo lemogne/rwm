@@ -396,7 +396,10 @@ namespace rwm_desktop {
 			char buffer[128];
 			std::string result = "";
 			FILE* pipe = popen(draw_cmd.c_str(), "r");
-			if (!pipe) throw std::runtime_error("popen() failed!");
+			if (!pipe) {
+				rwm::print_debug("popen() failed!");
+				return "ERROR|";
+			}
 			try {
 				while (fgets(buffer, sizeof buffer, pipe) != NULL)
 					result += buffer;
@@ -495,6 +498,7 @@ namespace rwm_desktop {
 					use_default_colors();
 				endwin();
 				std::cerr << "Could not open Desktop!\n";
+				exit(EXIT_FAILURE);
 			}
 		}
 		dirent* entry;
