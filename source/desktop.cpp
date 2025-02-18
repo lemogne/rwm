@@ -580,7 +580,7 @@ namespace rwm_desktop {
 	void init() {
 		if (rwm_config.empty()) {
 			rwm_config = getenv("HOME") + std::string("/.config/rwm");
-			rwm_config = "/usr/bin/rwmbin";
+			rwm_bin = "/usr/bin/rwmbin";
 		} else {
 			erase();
 		}
