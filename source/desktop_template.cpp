@@ -12,7 +12,7 @@ namespace rwm_desktop {
 
 	void terminate() {
 		// On termination
-		// Called by rwm::terminate(), do not call it here
+		// Called by rwm::terminate(), so do not call rwm::terminate() here
 	}
 
 	void render() {
@@ -21,12 +21,15 @@ namespace rwm_desktop {
 	} 
 
 	void key_pressed(int key) {
-		// Input handling comes here
+		// Input handling goes here
 		if (key == '\x03')
 			rwm::terminate();
 	}
 
 	bool key_priority(int key) {
+		// This handler is called before key code is passed to a window
+		// Returns whether key was intercepted
+		// If so, key is not sent to window
 		return false;
 	}
 
