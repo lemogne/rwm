@@ -69,8 +69,8 @@ namespace rwm {
 		ivec2 saved_cursor_pos = {0, 0};   // Saved cursor position
 		int cursor = 1;                    // Current cursor state
 		std::string esc_seq = "";          // Current escape sequence
-		bool auto_nl = true;               // Line-wrap
-		bool line_wrap = true;             // Line-wrap
+		bool auto_nl = false;              // In user input, on carriage-return, insert new-line
+		bool line_wrap = false;            // Line-wrap
 		std::vector<int> tabstop = {};     // List of tab stops
 	};
 
