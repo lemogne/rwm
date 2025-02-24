@@ -8,6 +8,8 @@ do
 		args="-O0 -g"
 	elif [ "$i" = "GENLIB" ]; then
 		separatelib=1
+	elif [ "$i" = "SIZE" ]; then
+		args="-Os -fuse-ld=gold -s"
 	fi
 done
 
