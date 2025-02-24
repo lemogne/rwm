@@ -258,7 +258,7 @@ namespace rwm {
 			return;
 
 		this->size = size;
-		box(frame, ' ', ' ');
+		wborder(frame, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 		wresize(frame, size.y, size.x);
 		wresize(alt_frame, size.y, size.x);
 		wresize(win, size.y - 2, size.x - 2);
