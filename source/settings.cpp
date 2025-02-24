@@ -9,18 +9,16 @@ namespace rwm_settings {
 		{"cwd",               &rwm_desktop::cwd},
 		{"default_shell",     &rwm_desktop::shell},
 
-		{"frame_vert_idle",   &rwm_desktop::frame_chars[rwm_desktop::IDLE]},
-		{"frame_horz_idle",   &rwm_desktop::frame_chars[rwm_desktop::IDLE + 1]},
-		{"frame_vert_top",    &rwm_desktop::frame_chars[rwm_desktop::TOP]},
-		{"frame_horz_top",    &rwm_desktop::frame_chars[rwm_desktop::TOP + 1]},
-		{"frame_vert_sel",    &rwm_desktop::frame_chars[rwm_desktop::SELECTED]},
-		{"frame_horz_sel",    &rwm_desktop::frame_chars[rwm_desktop::SELECTED + 1]},
-		{"frame_vert_resize", &rwm_desktop::frame_chars[rwm_desktop::RESIZE]},
-		{"frame_horz_resize", &rwm_desktop::frame_chars[rwm_desktop::RESIZE + 1]},
-
 		{"dmenu",             &rwm_desktop::buttons[0]},
 		{"window_menu",       &rwm_desktop::buttons[1]},
 		{"task_tab",          &rwm_desktop::buttons[2]},
+	};
+
+	std::unordered_map<std::string, std::pair<std::string*, size_t>> utf8char_vec_vars = {
+		{"frame_idle",   {&rwm_desktop::frame_chars[rwm_desktop::IDLE], 8}},
+		{"frame_top",    {&rwm_desktop::frame_chars[rwm_desktop::ACTIVE], 8}},
+		{"frame_sel",    {&rwm_desktop::frame_chars[rwm_desktop::SELECTED], 8}},
+		{"frame_resize", {&rwm_desktop::frame_chars[rwm_desktop::RESIZE], 8}},
 	};
 
 	std::unordered_map<std::string, int*> color_vars = {
@@ -120,6 +118,29 @@ namespace rwm_settings {
 		}
 	}
 
+	void set_utf8ch_vec(std::unordered_map<const std::string, std::pair<std::string *, size_t>>::iterator it, std::string value) {
+		std::string* p = it->second.first;
+		size_t n = it->second.second;
+		for (char& c : value) {
+			*p += c;
+			if (c >= 0) {
+				p++;
+				if (p - it->second.first > n * sizeof(std::string*)) {
+					rwm_desktop::show_info(
+						"While parsing Settings: Char Vector '" 
+					  + it->first
+					  + "' has length of at most " 
+					  + std::to_string(n)
+					  + ", yet the passed sequence '"
+					  + value
+					  + "' is longer."
+				  	);
+					break;
+				}
+			}
+		}
+	}
+
 	void set_bool(std::unordered_map<const std::string, bool *>::iterator it, std::string value) {
 		if (!value.compare("true"))
 			*it->second = true;
@@ -152,6 +173,7 @@ namespace rwm_settings {
 			std::string value = line.substr(pos + 1);
 
 			auto itstr = string_vars.find(var);
+			auto itutf8chvec = utf8char_vec_vars.find(var);
 			auto itstrvec = string_vec_vars.find(var);
 			auto itint = int_vars.find(var);
 			auto itbool = bool_vars.find(var);
@@ -159,6 +181,8 @@ namespace rwm_settings {
 
 			if (itstr != string_vars.end())
 				set_str(itstr, value);
+			else if (itutf8chvec != utf8char_vec_vars.end())
+				set_utf8ch_vec(itutf8chvec, value);
 			else if (itstrvec != string_vec_vars.end())
 				set_str_vec(itstrvec, value);
 			else if (itint != int_vars.end())

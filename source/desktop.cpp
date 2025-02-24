@@ -43,8 +43,18 @@ namespace rwm_desktop {
 	// Theme 
 	int theme[2] = {-1, 12};
 	int frame_theme[2] = {-1, 12};
-	std::string frame_chars[8] = {"│", "─", "║", "═", "|", "-", "*", "*"};
-	char ascii_frame_chars[8] = {ACS_VLINE, ACS_HLINE, ACS_VLINE, ACS_HLINE, '|', '-', '*', '*'};
+	std::string frame_chars[32] = {
+		"│", "│", "─", "─", "┌", "┐", "└", "┘",
+		"║", "║", "═", "═", "╔", "╗", "╚", "╝",
+		"|", "|", "-", "-", "┌", "┐", "└", "┘",
+		"*", "*", "*", "*", "*", "*", "*", "*"
+	};
+	char ascii_frame_chars[32] = {
+		ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER,
+		ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER,
+		'|', '|', '-', '-', ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER,
+		'*', '*', '*', '*', '*', '*', '*', '*'
+	};
 	std::string buttons[3] = {"[rwm]", "[ - o x ]", "[]"};
 
 	char icons[2][3][11] = {
@@ -998,15 +1008,38 @@ namespace rwm_desktop {
 
 	void do_frame(rwm::Window& win, frame_state state) {
 		if (rwm::utf8) {
-			cchar_t vert_cc;
-			cchar_t horiz_cc;
-			wchar_t vert  = rwm::utf8_to_codepoint(frame_chars[state]);
-			wchar_t horiz = rwm::utf8_to_codepoint(frame_chars[state + 1]);
-			setcchar(&vert_cc, &vert, 0, 0, nullptr);
-			setcchar(&horiz_cc, &horiz, 0, 0, nullptr);
-			box_set(win.frame, &vert_cc, &horiz_cc);
+			cchar_t left_cc;
+			cchar_t right_cc;
+			cchar_t top_cc;
+			cchar_t bottom_cc;
+			cchar_t top_left_cc;
+			cchar_t top_right_cc;
+			cchar_t bottom_left_cc;
+			cchar_t bottom_right_cc;
+			wchar_t left = rwm::utf8_to_codepoint(frame_chars[state + LEFT]);
+			wchar_t right = rwm::utf8_to_codepoint(frame_chars[state + RIGHT]);
+			wchar_t top = rwm::utf8_to_codepoint(frame_chars[state + TOP]);
+			wchar_t bottom = rwm::utf8_to_codepoint(frame_chars[state + BOTTOM]);
+			wchar_t top_left = rwm::utf8_to_codepoint(frame_chars[state + TOP_LEFT]);
+			wchar_t top_right = rwm::utf8_to_codepoint(frame_chars[state + TOP_RIGHT]);
+			wchar_t bottom_left = rwm::utf8_to_codepoint(frame_chars[state + BOTTOM_LEFT]);
+			wchar_t bottom_right = rwm::utf8_to_codepoint(frame_chars[state + BOTTOM_RIGHT]);
+			setcchar(&left_cc, &left, 0, 0, nullptr);
+			setcchar(&right_cc, &right, 0, 0, nullptr);
+			setcchar(&top_cc, &top, 0, 0, nullptr);
+			setcchar(&bottom_cc, &bottom, 0, 0, nullptr);
+			setcchar(&top_left_cc, &top_left, 0, 0, nullptr);
+			setcchar(&top_right_cc, &top_right, 0, 0, nullptr);
+			setcchar(&bottom_left_cc, &bottom_left, 0, 0, nullptr);
+			setcchar(&bottom_right_cc, &bottom_right, 0, 0, nullptr);
+			wborder_set(win.frame, &left_cc, &right_cc, &top_cc, &bottom_cc, &top_left_cc, &top_right_cc, &bottom_left_cc, &bottom_right_cc);
 		} else {
-			box(win.frame, ascii_frame_chars[state], ascii_frame_chars[state + 1]);
+			wborder(win.frame, 
+				ascii_frame_chars[state + LEFT], ascii_frame_chars[state + RIGHT],
+				ascii_frame_chars[state + TOP], ascii_frame_chars[state + BOTTOM],
+				ascii_frame_chars[state + TOP_LEFT], ascii_frame_chars[state + TOP_RIGHT],
+				ascii_frame_chars[state + BOTTOM_LEFT], ascii_frame_chars[state + BOTTOM_RIGHT]
+			);
 		}
 	}
 
@@ -1098,7 +1131,7 @@ namespace rwm_desktop {
 			if (rwm::utf8 || is_focused) 
 				wattron(win.frame, A_REVERSE);
 
-			do_frame(win, is_focused ? TOP : IDLE);
+			do_frame(win, is_focused ? ACTIVE : IDLE);
 		}
 		mvwaddstr(win.frame, 0, 1, win.title.c_str());
 		if (!tiled_mode)

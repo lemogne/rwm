@@ -36,7 +36,8 @@ namespace rwm_desktop {
 		TABBED = 2,
 		STACKING = 3,
 	};
-	enum frame_state {IDLE = 0, TOP = 2, SELECTED = 4, RESIZE = 6};
+	enum frame_part {LEFT = 0, RIGHT = 1, TOP = 2, BOTTOM = 3, TOP_LEFT = 4, TOP_RIGHT = 5, BOTTOM_LEFT = 6, BOTTOM_RIGHT = 7};
+	enum frame_state {IDLE = 0, ACTIVE = 8, SELECTED = 16, RESIZE = 24};
 
 	extern rwm::ivec2 drag_pos;
 	extern int resize_mode;
@@ -63,8 +64,8 @@ namespace rwm_desktop {
 	extern std::string buttons[3];
 	extern char icons[2][3][11];
 	extern char icon_colors[2][2];
-	extern std::string frame_chars[8];
-	extern char ascii_frame_chars[8];
+	extern std::string frame_chars[32];
+	extern char ascii_frame_chars[32];
 
 	void set_selected(rwm::Window* win);
 
