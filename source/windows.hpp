@@ -70,7 +70,7 @@ namespace rwm {
 		int cursor = 1;                    // Current cursor state
 		std::string esc_seq = "";          // Current escape sequence
 		bool auto_nl = false;              // In user input, on carriage-return, insert new-line
-		bool line_wrap = false;            // Line-wrap
+		bool line_wrap = true;             // Line-wrap
 		std::vector<int> tabstop = {};     // List of tab stops
 	};
 
@@ -109,6 +109,7 @@ namespace rwm {
 		void maximize();                                                           // Maximise or unmaximise window based on flags
 		void flush();                                                              // Flushes output in output buffer to window
 		void flatten_buffers();                                                    // Flattens output buffers into one
+		void clear_frame();                                                        // Clears window frame
 		int destroy();                                                             // Destroys window (use before deleting!)
 	private:
 	// Parser methods

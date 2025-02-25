@@ -209,7 +209,7 @@ namespace rwm {
 		if (status & CANNOT_RESIZE)
 			return;
 		if (status & rwm::FULLSCREEN) {
-			box(frame, ' ', ' ');
+			clear_frame();
 			mvwin(frame, 0, 0);
 			mvwin(alt_frame, 0, 0);
 			mvwin(win, 0, 0);
@@ -220,7 +220,7 @@ namespace rwm {
 			wresize(alt_win, getmaxy(stdscr) - 1, getmaxx(stdscr) - 1);
 
 		} else if (status & rwm::MAXIMIZED) {
-			box(frame, ' ', ' ');
+			clear_frame();
 			mvwin(frame, 0, 0);
 			mvwin(alt_frame, 0, 0);
 			mvwin(win, 1, 1);
@@ -231,7 +231,7 @@ namespace rwm {
 			wresize(alt_win, getmaxy(stdscr) - 3, getmaxx(stdscr) - 2);
 
 		} else {
-			box(frame, ' ', ' ');
+			clear_frame();
 			wresize(frame, size.y, size.x);
 			wresize(alt_frame, size.y, size.x);
 			wresize(win, size.y - 2, size.x - 2);
@@ -253,12 +253,16 @@ namespace rwm {
 		should_refresh = true;
 	}
 
+	void Window::clear_frame() {
+		wborder(frame, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+	}
+
 	void Window::resize(ivec2 size) {
 		if (status & (rwm::MAXIMIZED | rwm::FULLSCREEN | rwm::CANNOT_RESIZE)) 
 			return;
 
 		this->size = size;
-		wborder(frame, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+		clear_frame();
 		wresize(frame, size.y, size.x);
 		wresize(alt_frame, size.y, size.x);
 		wresize(win, size.y - 2, size.x - 2);
