@@ -1174,6 +1174,9 @@ namespace rwm_desktop {
 
 		fifobuf[ret - 1] = 0; // remove \n character
 		std::string program = fifobuf;
+		if (ret >= 4 && fifobuf[ret - 3] == '@') 
+			program = program.substr(0, ret - 4) + '@';
+		
 		int offset = rwm::windows.size();
 		open_program(program, {10 + 5 * offset, 10 + 10 * offset}, {32, 95});
 		//P_SEL_WIN->title = program;

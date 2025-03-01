@@ -1,2 +1,2 @@
-#!/usr/bin/sh
-([ -e /tmp/rwm/open.fifo ] && (echo "$@" > /tmp/rwm/open.fifo)) || (echo "RWM window opening fifo not found!" >&2)
+#!/usr/bin/bash
+([ -e /tmp/rwm/open.fifo ] && (echo "${*@Q}" > /tmp/rwm/open.fifo)) || (echo "RWM window opening fifo not found!" >&2)
