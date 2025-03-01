@@ -255,6 +255,7 @@ namespace rwm {
 
 	void Window::clear_frame() {
 		wborder(frame, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
+		wborder(alt_frame, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
 	}
 
 	void Window::resize(ivec2 size) {
