@@ -88,14 +88,15 @@ namespace rwm {
 			available_chars.clear();
 	}
 
-	bool is_CJK(std::string utfchar) {
-		char32_t c = utf8_to_codepoint(utfchar);
-		return (0x2e80 <= c && c <= 0xa4cf) || (0xac00 <= c && c <= 0xd7ff);
-	}
+	// bool is_CJK(std::string utfchar) {
+	// 	char32_t c = utf8_to_codepoint(utfchar);
+	// 	return (0x2e80 <= c && c <= 0xa4cf) || (0xac00 <= c && c <= 0xd7ff);
+	// }
 
 	void init_encoding() {
 		utf8 = !std::string("UTF-8").compare(nl_langinfo(CODESET));
-		is_tty = NULL == getenv("DISPLAY");
+		std::string tty_name = ttyname(0);
+		is_tty = tty_name.substr(0, 8) == "/dev/tty";
 
 		acs = {
 			{"─", WACS_HLINE}, {"═", WACS_D_HLINE}, {"━", WACS_T_HLINE},
@@ -450,10 +451,8 @@ namespace rwm {
 						waddstr(win, ch.c_str());
 						utfchar = "";
 					} else if (utfchar.length() >= n_cont_bytes) {
-						if (is_CJK(utfchar))
-							waddstr(win, "??");
-						else
-							waddstr(win, "?");
+						std::string unknown(wcwidth(utf8_to_codepoint(utfchar)), '?');
+						waddstr(win, unknown.c_str());
 						utfchar = "";
 					}
 				}
