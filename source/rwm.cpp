@@ -129,6 +129,19 @@ namespace rwm {
 		{BUTTON4_RELEASED, 99},
 		{BUTTON5_RELEASED, 99},
 	};
+	std::unordered_map<int, char> mouse_conversion_1006 = {
+		{BUTTON1_PRESSED, 0},
+		{BUTTON2_PRESSED, 1},
+		{BUTTON3_PRESSED, 2},
+		{BUTTON4_PRESSED, 64},
+		{BUTTON5_PRESSED, 65},
+		{BUTTON1_RELEASED, 0},
+		{BUTTON2_RELEASED, 1},
+		{BUTTON3_RELEASED, 2},
+		{BUTTON4_RELEASED, 64},
+		{BUTTON5_RELEASED, 65},
+	};
+
 
 	void terminate() {
 		rwm_desktop::terminate();
@@ -328,10 +341,10 @@ namespace rwm {
 							set_selected(get_top_window(click_pos));
 						}
 						if (selected_window) {
+							int x, y;
+							getbegyx(windows[SEL_WIN]->win, y, x);
 							switch (windows[SEL_WIN]->mouse_mode) {
 								case 1000: {
-									int x, y;
-									getbegyx(windows[SEL_WIN]->win, y, x);
 									std::string mouse_msg = {'\033', '[', 'M', mouse_conversion.at(event.bstate & MOUSE_MASK), 
 										(char) (event.x - x + 33), (char) (event.y - y + 33)
 									};
@@ -341,10 +354,18 @@ namespace rwm {
 								}
 								break;
 
-								/*case 1006:
-								std::string mouse_msg = "\033[" + std::to_string(mouse_state & 3) + ';'
-									+ std::to_string(event.y- y + 1) + ';' + std::to_string(event.x - x + 1)
-									+ 'M';*/
+								case 1006: {
+									int mouse_state = mouse_conversion_1006.at(event.bstate & MOUSE_MASK);
+									std::string mouse_msg = "\033[<" 
+										+ std::to_string(mouse_state) + ';'
+										+ std::to_string(event.x - x + 1) + ';'
+										+ std::to_string(event.y - y + 1) 
+										+ ((event.bstate & MOUSE_PRESSED) ? 'M' : 'm');
+									if (DEBUG)
+										print_debug(mouse_msg);
+									windows[SEL_WIN]->send(mouse_msg);
+								}
+								break;
 
 
 								default:

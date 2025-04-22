@@ -1086,7 +1086,7 @@ namespace rwm {
 			}
 			if (state.is_text) {
 				state.esc_seq = "";
-				if (buffer[i] < 32 && DEBUG && master != 2)
+				if (buffer[i] < 32 && DEBUG && master != 2 && buffer[i] != 27)
 					print_debug('[' + std::to_string((int) buffer[i]) + ']' + ((buffer[i] >= 0) ? ASCII_names[buffer[i]] : ""));
 				switch (buffer[i]) {
 					case '\x1B':
